@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="偷偷聊">
+  <link rel="icon" href="data:,">
+  <title>偷偷聊</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <button id="exit-btn" class="icon-btn exit hidden" aria-label="退出房间" title="退出房间">←</button>
+      <div class="brand">
+        <span class="brand-name">偷偷聊</span>
+        <span id="room-name" class="room-name"></span>
+      </div>
+      <button id="users-btn" class="users-btn" aria-label="在线用户">
+        <span class="users-dot" aria-hidden="true"></span>
+        <span id="user-count">0</span>
+      </button>
+    </header>
+
+    <div id="conn-banner" class="banner hidden" role="status"></div>
+
+    <main id="messages" aria-live="polite"></main>
+
+    <button id="new-msg-btn" class="new-msg hidden">新消息 ↓</button>
+
+    <form id="composer" autocomplete="off">
+      <button type="button" id="attach-btn" class="icon-btn attach" aria-label="发送文件" title="发送文件">＋</button>
+      <input id="file-input" type="file" multiple hidden>
+      <textarea id="text-input" rows="1" maxlength="4000" placeholder="说点什么…" aria-label="消息输入框"></textarea>
+      <button type="submit" id="send-btn" class="send-btn" aria-label="发送">发送</button>
+    </form>
+
+    <section id="join-panel" class="join-panel" aria-label="加入房间">
+      <div class="join-card">
+        <div class="join-mark" aria-hidden="true">
+          <span class="bubble bubble-a"></span>
+          <span class="bubble bubble-b"></span>
+        </div>
+        <h1>偷偷聊</h1>
+        <p class="tagline">同一片 Wi-Fi，悄悄聊。</p>
+        <label for="name-input">给自己起个名字</label>
+        <input id="name-input" maxlength="20" placeholder="例如：柚子" autocomplete="nickname">
+        <button type="button" id="join-btn">进入房间</button>
+        <p id="join-error" class="error"></p>
+        <p class="privacy-note">局域网内明文传输，请只在可信网络使用。</p>
+      </div>
+    </section>
+
+    <div id="users-sheet" class="sheet-wrap hidden" aria-label="在线用户">
+      <div class="sheet-backdrop" data-close="users"></div>
+      <div class="sheet">
+        <div class="sheet-head">
+          <span>在线的人</span>
+          <button type="button" class="icon-btn" data-close="users" aria-label="关闭">×</button>
+        </div>
+        <ul id="users-list"></ul>
+      </div>
+    </div>
+
+    <div id="lightbox" class="lightbox hidden" role="dialog" aria-label="图片预览">
+      <div class="lightbox-backdrop" data-close="lightbox"></div>
+      <div class="lightbox-body">
+        <img id="lightbox-img" alt="">
+        <a id="lightbox-download" class="lightbox-download" download>下载原图</a>
+        <button type="button" class="icon-btn lightbox-close" data-close="lightbox" aria-label="关闭">×</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+  </div>
+  <noscript>偷偷聊需要 JavaScript，请在浏览器设置中开启。</noscript>
+  <script src="/app.js"></script>
+</body>
+</html>

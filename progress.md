@@ -1,0 +1,43 @@
+# Progress
+
+## 当前 APK 能力边界（重要）
+
+- 已经可以聊天/传文件：主机 App + 浏览器客户端（Web 聊天页）。
+- 主机 App 的「进入聊天」是 WebView 打开本机服务器，主机自己也是客户端。
+- 其他手机/iPhone 用浏览器打开 `http://主机IP:8520/`，不需要装 App（当前版本）。
+- **未完成**：前台服务/后台保活、安卓原生加入 + 相机扫码、PIN/自动发现、完整压测。
+- 主机 App 当前需保持打开/前台；FGS 加完后才能可靠后台运行。
+
+## 2026-10-20 · Phase 0–3 首版
+
+- Phase 0 完成：三模块工程、Gradle/AGP/Kotlin/Compose、compileSdk 37、APK 构建；用户真机 health 验证通过。
+- Phase 1 完成：`ChatEngine`、JSONL 日志、文件存储、房间 epoch；JVM 测试 5/5 通过。
+- Phase 2 完成首版：Ktor HTTP/WS、Web 聊天页、上传/下载/Range、安全头、Origin 校验。
+- 浏览器 E2E（Puppeteer + Chrome）通过：
+  - 3 个独立浏览器上下文加入，用户数 3
+  - 文字互发并显示发送者/时间
+  - 文件上传，双方看到文件卡片，下载返回正确内容
+  - 刷新/自动重连后快照恢复历史
+  - 修复 `.bubble` CSS 冲突后复验
+- Phase 3 最小版：
+  - MainActivity 启动 `LanServer`（8520）、二维码、LAN URL、在线人数
+  - ChatActivity WebView 加载本机聊天页；文件选择器、DownloadManager、返回退出
+  - 18MB debug APK；归档到 `APK输出/偷偷聊/2026-10-20_102413/`
+- 测试工具/临时目录已清理（Puppeteer/ws/Chrome profile/npm cache）；保留 `/tmp/toutouliao-sdk` 与 `/tmp/toutouliao-gradle-home` 供下次构建。
+- 下一步：用户真机安装 APK 验证聊天/文件；通过后加前台服务与原生加入/扫码。
+
+## 2026-10-26 · 局域网连接问题 / 诊断版
+
+- 用户反馈：主机 App 显示房间已开启、主机 WebView 能聊天；但 iPhone/另一台设备打开 IP 时浏览器提示无法连接。
+- 已确认：主机本机聊天正常 → Ktor 已在运行；问题在“局域网访问”这一段（IP 选错、端口、VPN/多网卡、AP 隔离），不是聊天 UI。
+- 关键差异：Phase 0 健康检查用 18520，正式聊天版用 8520；旧地址/旧书签会连不上。
+- 已做 `0.1.1-diag` 诊断版：
+  - 通过 `ConnectivityManager` + `NetworkInterface` 列出所有 IPv4 候选；VPN/移动网络仅展示不推荐，默认优先 Wi-Fi/热点/以太网。
+  - 显示网卡名、私有/非私网、推荐地址；网络变化和回到前台自动刷新。
+  - 增加 `127.0.0.1:8520` 和当前 IP:8520 的本机 health 自检。
+  - 增加“系统浏览器测试”（用主机自带浏览器打开 LAN URL）。
+  - 增加“复制诊断信息”。
+  - 旧端口提示；ChatActivity 也保持亮屏。
+- APK：14MB，versionCode 2 / 0.1.1-diag；归档 `APK输出/偷偷聊/2026-10-26_113106_diag/`。
+- 构建环境：`/tmp/toutouliao-sdk` 的 Android 37 platform/build-tools 曾被清空，已从 dl.google.com 重新补齐（license 已接受）；未下载模拟器。SDK 压缩包已删，保留 SDK 目录。
+- 待用户回报：默认地址、本机自检结果、系统浏览器测试、另一台设备 `/api/health`、复制诊断文本。
