@@ -51,6 +51,25 @@ APK输出/茶室/v<versionName>_vc<versionCode>/茶室-v<versionName>-vc<version
 - 第三位到 9 后不升第二位，改用第四位：`0.1.9.1`、`0.1.9.2`……
 - `versionCode` 是 Android 安装顺序号，每次构建单调递增，不随显示版本重置。
 
+## 发布 / Release
+
+每次版本更新都要同时完成：
+
+1. 更新 `CHANGELOG.md` 和 `docs/release-notes/<version>.md`
+2. `./gradlew :app:assembleDebug`，确认版本化 APK
+3. 提交源码并 push
+4. 创建 GitHub Release，上传版本化 APK，并把更新日志作为 release notes：
+
+```bash
+gh release create "v<version>" \
+  "<版本化 APK 路径>" \
+  --title "茶室 <version>" \
+  --notes-file "docs/release-notes/<version>.md" \
+  --target main
+```
+
+Release 使用独立 tag，不覆盖旧 release；旧版本 APK 继续保留在本机 `APK输出/茶室/`。
+
 ## 本地开发 Web UI
 
 ```bash

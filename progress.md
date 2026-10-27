@@ -22,7 +22,7 @@
 - Phase 3 最小版：
   - MainActivity 启动 `LanServer`（8520）、二维码、LAN URL、在线人数
   - ChatActivity WebView 加载本机聊天页；文件选择器、DownloadManager、返回退出
-  - 18MB debug APK；归档到 `APK输出/偷偷聊/2026-10-20_102413/`
+  - 18MB debug APK；归档到 `APK输出/茶室/2026-10-20_102413/`
 - 测试工具/临时目录已清理（Puppeteer/ws/Chrome profile/npm cache）；保留 `/tmp/toutouliao-sdk` 与 `/tmp/toutouliao-gradle-home` 供下次构建。
 - 下一步：用户真机安装 APK 验证聊天/文件；通过后加前台服务与原生加入/扫码。
 
@@ -38,7 +38,7 @@
   - 增加“系统浏览器测试”（用主机自带浏览器打开 LAN URL）。
   - 增加“复制诊断信息”。
   - 旧端口提示；ChatActivity 也保持亮屏。
-- APK：14MB，versionCode 2 / 0.1.1-diag；归档 `APK输出/偷偷聊/2026-10-26_113106_diag/`。
+- APK：14MB，versionCode 2 / 0.1.1-diag；归档 `APK输出/茶室/2026-10-26_113106_diag/`。
 - 构建环境：`/tmp/toutouliao-sdk` 的 Android 37 platform/build-tools 曾被清空，已从 dl.google.com 重新补齐（license 已接受）；未下载模拟器。SDK 压缩包已删，保留 SDK 目录。
 - 待用户回报：默认地址、本机自检结果、系统浏览器测试、另一台设备 `/api/health`、复制诊断文本。
 

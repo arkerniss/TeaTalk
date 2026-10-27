@@ -32,8 +32,8 @@
 ## 构建/交付事实
 
 - APK：`app/build/outputs/apk/debug/app-debug.apk`（18MB，debug 签名）
-- 归档：`APK输出/偷偷聊/2026-10-20_102413/app-debug.apk`
-- 包名/标签：`com.vertin.teatalk` / 偷偷聊；minSdk 26 / targetSdk 36 / compileSdk 37
+- 归档：`APK输出/茶室/2026-10-20_102413/app-debug.apk`
+- 包名/标签：`com.vertin.teatalk` / 茶室；minSdk 26 / targetSdk 36 / compileSdk 37
 - 端口：8520；二维码内容：`http://<LAN IP>:8520/`
 - 服务端根：`filesDir/toutouliao/{meta.json,messages.jsonl,files,tmp}`
 - 测试工具已清理：`/tmp/toutouliao-e2e`、`/tmp/toutouliao-ws-test`、npm cache、Chrome profile。
@@ -58,7 +58,7 @@
 
 ## 设计/命名
 
-- App 显示名「偷偷聊」；包名 `com.vertin.teatalk`；服务端 app id `toutouliao`。
+- App 显示名「茶室」；包名 `com.vertin.teatalk`；服务端 app id `teatalk`。
 - 名字是玩梗，不代表加密；README/设置页必须写“局域网内明文传输”。
 
 ## 2026-10-26 · 局域网连不上的证据
@@ -72,4 +72,4 @@
 - 诊断版已加：Wi-Fi/热点优先的候选地址、网卡名、VPN 警告、本机 health 自检、系统浏览器测试、复制诊断、网络变化自动刷新。
 - 关键验证：诊断版里若「当前IP:8520」自检失败，是 Ktor 绑定/接口问题；若本机自检 ✓ 且主机系统浏览器能打开，但另一台不行，是网络隔离/VPN，不是 App。
 - 构建环境事故：`/tmp/toutouliao-sdk` 的 platform/build-tools 被清空，导致一次构建失败；已重新下载 Android 37 platform/build-tools 并补齐 license，未下载模拟器；下载 zip 已删除。
-- 诊断版：`0.1.1-diag`，versionCode 2，14MB；`APK输出/偷偷聊/2026-10-26_113106_diag/`。
+- 诊断版：`0.1.1-diag`，versionCode 2，14MB；`APK输出/茶室/2026-10-26_113106_diag/`。
