@@ -244,12 +244,26 @@ class ScanQrActivity : ComponentActivity() {
     private fun decodeQr(reader: MultiFormatReader, image: ImageProxy): String? {
         val plane = image.planes.firstOrNull() ?: return null
         val buffer = plane.buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
         val width = image.width
         val height = image.height
+        // Y-plane row stride often includes padding; copying only width*height
+        // bytes directly would shift every row and break QR decoding on many phones.
+        val luma = ByteArray(width * height)
+        runCatching {
+            val base = buffer.position()
+            if (plane.pixelStride == 1 && plane.rowStride == width) {
+                buffer.get(luma, 0, luma.size)
+            } else {
+                for (row in 0 until height) {
+                    val rowStart = base + row * plane.rowStride
+                    for (column in 0 until width) {
+                        luma[row * width + column] = buffer.get(rowStart + column * plane.pixelStride)
+                    }
+                }
+            }
+        }.getOrElse { return null }
         val rotation = image.imageInfo.rotationDegrees
-        val (rotated, rotatedWidth, rotatedHeight) = rotateLuma(bytes, width, height, rotation)
+        val (rotated, rotatedWidth, rotatedHeight) = rotateLuma(luma, width, height, rotation)
         val source = PlanarYUVLuminanceSource(
             rotated,
             rotatedWidth,

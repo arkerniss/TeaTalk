@@ -145,11 +145,13 @@ class HostActivity : ComponentActivity() {
                 withContext(Dispatchers.IO) { server.start() }
                 running = true
                 runCatching {
-                    discovery.startAdvertising(
-                        roomName = server.state.value.room.name.ifBlank { "我的局域网" },
-                        port = server.port,
-                        hostId = hostId,
-                    )
+                    withContext(Dispatchers.IO) {
+                        discovery.startAdvertising(
+                            roomName = server.state.value.room.name.ifBlank { "我的局域网" },
+                            port = server.port,
+                            hostId = hostId,
+                        )
+                    }
                 }
             }.onFailure { error = it.message ?: it::class.java.simpleName }
         }
