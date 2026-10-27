@@ -7,16 +7,16 @@ plugins {
 }
 
 android {
-    namespace = "com.vertin.toutouliao"
+    namespace = "com.vertin.teatalk"
     compileSdk = 37
     buildToolsVersion = "37.0.0"
 
     defaultConfig {
-        applicationId = "com.vertin.toutouliao"
+        applicationId = "com.vertin.teatalk"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.1.2"
+        versionCode = 5
+        versionName = "0.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -94,7 +94,7 @@ val archiveVersionedDebugApk = tasks.register("archiveVersionedDebugApk") {
         val versionCode = android.defaultConfig.versionCode ?: 0
         val timestamp = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
-        val baseName = "偷偷聊-v${versionName}-vc${versionCode}-${timestamp}-debug"
+        val baseName = "茶室-v${versionName}-vc${versionCode}-${timestamp}-debug"
 
         val versionedDir = layout.buildDirectory.dir("outputs/apk/debug/versioned").get().asFile
         versionedDir.mkdirs()
@@ -102,7 +102,7 @@ val archiveVersionedDebugApk = tasks.register("archiveVersionedDebugApk") {
         source.copyTo(versioned, overwrite = false)
 
         val workspaceRoot = rootProject.projectDir.parentFile?.parentFile ?: rootProject.projectDir
-        val archiveDir = File(workspaceRoot, "APK输出/偷偷聊/v${versionName}_vc${versionCode}")
+        val archiveDir = File(workspaceRoot, "APK输出/茶室/v${versionName}_vc${versionCode}")
         archiveDir.mkdirs()
         val archived = File(archiveDir, "$baseName.apk").uniqueFile()
         source.copyTo(archived, overwrite = false)

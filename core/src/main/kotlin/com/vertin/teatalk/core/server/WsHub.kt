@@ -1,10 +1,10 @@
-package com.vertin.toutouliao.core.server
+package com.vertin.teatalk.core.server
 
 import com.google.gson.Gson
 import com.google.gson.JsonParser
-import com.vertin.toutouliao.core.engine.ChatEngine
-import com.vertin.toutouliao.core.model.RoomEvent
-import com.vertin.toutouliao.core.model.User
+import com.vertin.teatalk.core.engine.ChatEngine
+import com.vertin.teatalk.core.model.RoomEvent
+import com.vertin.teatalk.core.model.User
 import io.ktor.http.HttpHeaders
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.websocket.DefaultWebSocketServerSession

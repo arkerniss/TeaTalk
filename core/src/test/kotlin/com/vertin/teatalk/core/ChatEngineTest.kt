@@ -1,6 +1,6 @@
-package com.vertin.toutouliao.core
+package com.vertin.teatalk.core
 
-import com.vertin.toutouliao.core.engine.ChatEngine
+import com.vertin.teatalk.core.engine.ChatEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -20,7 +20,7 @@ class ChatEngineTest {
 
     @Before
     fun setUp() {
-        tempDir = Files.createTempDirectory("toutouliao-test").toFile()
+        tempDir = Files.createTempDirectory("teatalk-test").toFile()
         engine = newEngine()
     }
 

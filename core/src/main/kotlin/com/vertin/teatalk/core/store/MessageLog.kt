@@ -1,7 +1,7 @@
-package com.vertin.toutouliao.core.store
+package com.vertin.teatalk.core.store
 
 import com.google.gson.Gson
-import com.vertin.toutouliao.core.model.Message
+import com.vertin.teatalk.core.model.Message
 import java.io.File
 
 /** Append-only JSONL message log. A malformed line is skipped, never fatal. */

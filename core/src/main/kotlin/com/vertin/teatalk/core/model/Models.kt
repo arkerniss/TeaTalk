@@ -1,4 +1,4 @@
-package com.vertin.toutouliao.core.model
+package com.vertin.teatalk.core.model
 
 import com.google.gson.annotations.SerializedName
 

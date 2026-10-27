@@ -33,7 +33,7 @@
 
 - APK：`app/build/outputs/apk/debug/app-debug.apk`（18MB，debug 签名）
 - 归档：`APK输出/偷偷聊/2026-10-20_102413/app-debug.apk`
-- 包名/标签：`com.vertin.toutouliao` / 偷偷聊；minSdk 26 / targetSdk 36 / compileSdk 37
+- 包名/标签：`com.vertin.teatalk` / 偷偷聊；minSdk 26 / targetSdk 36 / compileSdk 37
 - 端口：8520；二维码内容：`http://<LAN IP>:8520/`
 - 服务端根：`filesDir/toutouliao/{meta.json,messages.jsonl,files,tmp}`
 - 测试工具已清理：`/tmp/toutouliao-e2e`、`/tmp/toutouliao-ws-test`、npm cache、Chrome profile。
@@ -58,7 +58,7 @@
 
 ## 设计/命名
 
-- App 显示名「偷偷聊」；包名 `com.vertin.toutouliao`；服务端 app id `toutouliao`。
+- App 显示名「偷偷聊」；包名 `com.vertin.teatalk`；服务端 app id `toutouliao`。
 - 名字是玩梗，不代表加密；README/设置页必须写“局域网内明文传输”。
 
 ## 2026-10-26 · 局域网连不上的证据

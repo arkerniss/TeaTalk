@@ -1,4 +1,4 @@
-package com.vertin.toutouliao.util
+package com.vertin.teatalk.util
 
 import android.content.Context
 import android.net.ConnectivityManager

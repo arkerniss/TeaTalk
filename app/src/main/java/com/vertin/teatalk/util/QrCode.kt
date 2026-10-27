@@ -1,4 +1,4 @@
-package com.vertin.toutouliao.util
+package com.vertin.teatalk.util
 
 import android.graphics.Bitmap
 import android.graphics.Color

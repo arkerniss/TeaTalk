@@ -1,4 +1,4 @@
-package com.vertin.toutouliao
+package com.vertin.teatalk
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -62,14 +62,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vertin.toutouliao.chat.ChatActivity
-import com.vertin.toutouliao.core.server.LanServer
-import com.vertin.toutouliao.core.server.ServerConfig
-import com.vertin.toutouliao.util.AddressKind
-import com.vertin.toutouliao.util.LanCandidate
-import com.vertin.toutouliao.util.NetworkAddresses
-import com.vertin.toutouliao.util.NetworkInspection
-import com.vertin.toutouliao.util.generateQrBitmap
+import com.vertin.teatalk.chat.ChatActivity
+import com.vertin.teatalk.core.server.LanServer
+import com.vertin.teatalk.core.server.ServerConfig
+import com.vertin.teatalk.util.AddressKind
+import com.vertin.teatalk.util.LanCandidate
+import com.vertin.teatalk.util.NetworkAddresses
+import com.vertin.teatalk.util.NetworkInspection
+import com.vertin.teatalk.util.generateQrBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,9 +120,11 @@ class MainActivity : ComponentActivity() {
             LanServer(
                 ServerConfig(
                     port = 8520,
-                    dataDir = File(filesDir, "toutouliao"),
+                    dataDir = File(filesDir, "teatalk"),
                     assetSource = AndroidAssetSource(applicationContext.assets),
                     roomName = "我的局域网",
+                    appId = "teatalk",
+                    appVersion = BuildConfig.VERSION_NAME,
                 ),
             )
         }
@@ -208,7 +210,7 @@ class MainActivity : ComponentActivity() {
         }
 
         fun diagnosticsText(): String = buildString {
-            appendLine("偷偷聊诊断")
+            appendLine("茶室诊断")
             appendLine("版本: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
             appendLine("Android: ${Build.VERSION.RELEASE} / SDK ${Build.VERSION.SDK_INT}")
             appendLine("服务器: ${if (running) "running" else "not running"} / port ${server.port}")
@@ -238,13 +240,13 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    "偷偷聊",
+                    "茶室",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
-                    "同一片 Wi-Fi，悄悄聊。",
+                    "同一片 Wi-Fi，慢慢聊。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -334,7 +336,7 @@ class MainActivity : ComponentActivity() {
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 if (lanUrl != null) {
-                                    TextButton(onClick = { copyText("偷偷聊房间", lanUrl) }) { Text("复制链接") }
+                                    TextButton(onClick = { copyText("茶室房间", lanUrl) }) { Text("复制链接") }
                                     TextButton(onClick = {
                                         runCatching {
                                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(lanUrl)))
@@ -408,7 +410,7 @@ class MainActivity : ComponentActivity() {
                             Spacer(Modifier.height(2.dp))
                             TextButton(
                                 onClick = {
-                                    copyText("偷偷聊诊断", diagnosticsText())
+                                    copyText("茶室诊断", diagnosticsText())
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {

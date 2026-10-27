@@ -1,7 +1,7 @@
-package com.vertin.toutouliao
+package com.vertin.teatalk
 
 import android.content.res.AssetManager
-import com.vertin.toutouliao.core.server.AssetSource
+import com.vertin.teatalk.core.server.AssetSource
 
 /** Reads the web UI that Gradle packages from the repo's web/ directory. */
 class AndroidAssetSource(private val assets: AssetManager) : AssetSource {

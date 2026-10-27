@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "toutouliao"
+rootProject.name = "teatalk"
 include(":app", ":core", ":devserver")

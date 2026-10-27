@@ -1,4 +1,4 @@
-package com.vertin.toutouliao.chat
+package com.vertin.teatalk.chat
 
 import android.app.DownloadManager
 import android.content.Intent
@@ -26,7 +26,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.vertin.toutouliao.BuildConfig
+import com.vertin.teatalk.BuildConfig
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -110,7 +110,7 @@ class ChatActivity : ComponentActivity() {
         view.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val target = request.url
-                if (target.scheme == "toutouliao" && target.host == "exit") {
+                if (target.scheme == "teatalk" && target.host == "exit") {
                     finish()
                     return true
                 }

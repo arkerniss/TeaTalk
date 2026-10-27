@@ -1,4 +1,4 @@
-package com.vertin.toutouliao.core.store
+package com.vertin.teatalk.core.store
 
 import com.google.gson.Gson
 import java.io.File

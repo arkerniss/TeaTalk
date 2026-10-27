@@ -17,7 +17,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("com.vertin.toutouliao.devserver.DevServerKt")
+    mainClass.set("com.vertin.teatalk.devserver.DevServerKt")
 }
 
 tasks.named<JavaExec>("run") {

@@ -1,9 +1,9 @@
-package com.vertin.toutouliao.core.server
+package com.vertin.teatalk.core.server
 
 import com.google.gson.Gson
-import com.vertin.toutouliao.core.engine.ChatEngine
-import com.vertin.toutouliao.core.store.FileTooLargeException
-import com.vertin.toutouliao.core.store.UploadSizeMismatchException
+import com.vertin.teatalk.core.engine.ChatEngine
+import com.vertin.teatalk.core.store.FileTooLargeException
+import com.vertin.teatalk.core.store.UploadSizeMismatchException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
@@ -27,7 +27,7 @@ import java.io.RandomAccessFile
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-private const val SESSION_HEADER = "X-TouTouLiao-Session"
+private const val SESSION_HEADER = "X-TeaTalk-Session"
 private const val CLIENT_MSG_ID_HEADER = "X-Client-Msg-Id"
 
 fun Application.installRoutes(

@@ -1,4 +1,4 @@
-# 偷偷聊（TouTouLiao）
+# 茶室（TeaTalk）
 
 同一片 Wi-Fi 下的局域网群聊 + 文件传输：一台安卓手机开房间，iPhone / 其他安卓 / 电脑用浏览器加入。
 
@@ -16,6 +16,8 @@
 - `devserver/`：本地 JVM 开发服务器，方便用浏览器调试 Web 聊天页
 - `web/`：唯一一份 Web 聊天 UI（主机 WebView 与所有浏览器共用）
 
+> 内部包名仍是 `com.vertin.teatalk`，项目目录也保留 `toutouliao`。这样已安装版本可以直接覆盖升级，聊天数据不会因为改名丢失；对外品牌统一为「茶室 / TeaTalk」。
+
 ## 构建
 
 ```bash
@@ -25,8 +27,8 @@
 每次构建会自动生成带版本号和时间戳的 APK，不覆盖旧包：
 
 ```text
-app/build/outputs/apk/debug/versioned/偷偷聊-v<versionName>-vc<versionCode>-<时间>-debug.apk
-APK输出/偷偷聊/v<versionName>_vc<versionCode>/偷偷聊-v<versionName>-vc<versionCode>-<时间>-debug.apk
+app/build/outputs/apk/debug/versioned/茶室-v<versionName>-vc<versionCode>-<时间>-debug.apk
+APK输出/茶室/v<versionName>_vc<versionCode>/茶室-v<versionName>-vc<versionCode>-<时间>-debug.apk
 ```
 
 需要本机安装 Android SDK 37 / build-tools 37.0.0，`local.properties` 指向本机 SDK。仓库不包含 SDK、`build/`、APK 等产物。
@@ -51,4 +53,4 @@ devserver/build/install/devserver/bin/devserver
 - `task_plan.md`：阶段状态
 - `findings.md`：技术事实与已修复问题
 - `progress.md`：开发/验证记录
-- `docs/screenshots/web-chat.png`：Web 聊天页截图
+- `docs/screenshots/web-chat.png`：Web 页面截图

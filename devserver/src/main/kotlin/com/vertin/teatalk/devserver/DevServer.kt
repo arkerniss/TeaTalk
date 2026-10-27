@@ -1,8 +1,8 @@
-package com.vertin.toutouliao.devserver
+package com.vertin.teatalk.devserver
 
-import com.vertin.toutouliao.core.server.FileAssetSource
-import com.vertin.toutouliao.core.server.LanServer
-import com.vertin.toutouliao.core.server.ServerConfig
+import com.vertin.teatalk.core.server.FileAssetSource
+import com.vertin.teatalk.core.server.LanServer
+import com.vertin.teatalk.core.server.ServerConfig
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -15,12 +15,12 @@ fun main() {
             port = 18520,
             dataDir = dataDir,
             assetSource = FileAssetSource(File("web")),
-            roomName = "偷偷聊开发室",
+            roomName = "茶室开发室",
         ),
     )
     Runtime.getRuntime().addShutdownHook(Thread { server.stop() })
     server.start()
-    println("偷偷聊 devserver: http://127.0.0.1:18520/")
+    println("茶室 devserver: http://127.0.0.1:18520/")
     println("health: http://127.0.0.1:18520/api/health")
     System.out.flush()
     awaitCancellation()

@@ -1,4 +1,4 @@
-package com.vertin.toutouliao.core.server
+package com.vertin.teatalk.core.server
 
 import java.io.File
 

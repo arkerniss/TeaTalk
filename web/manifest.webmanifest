@@ -1,6 +1,6 @@
 {
-  "name": "偷偷聊",
-  "short_name": "偷偷聊",
+  "name": "茶室",
+  "short_name": "茶室",
   "description": "局域网聊天与文件传输",
   "start_url": "/",
   "display": "standalone",

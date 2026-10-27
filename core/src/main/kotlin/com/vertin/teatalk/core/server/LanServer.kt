@@ -1,6 +1,6 @@
-package com.vertin.toutouliao.core.server
+package com.vertin.teatalk.core.server
 
-import com.vertin.toutouliao.core.engine.ChatEngine
+import com.vertin.teatalk.core.engine.ChatEngine
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine

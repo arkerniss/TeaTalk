@@ -70,11 +70,11 @@
     const params = new URLSearchParams(location.search);
     const queryName = cleanName(params.get('name') || '');
     state.embed = params.get('embed') === '1';
-    state.clientId = storageGet(sessionStorage, 'toutouliao.clientId') || randomId();
-    storageSet(sessionStorage, 'toutouliao.clientId', state.clientId);
-    state.name = queryName || cleanName(storageGet(localStorage, 'toutouliao.name') || '');
+    state.clientId = storageGet(sessionStorage, 'teatalk.clientId') || randomId();
+    storageSet(sessionStorage, 'teatalk.clientId', state.clientId);
+    state.name = queryName || cleanName(storageGet(localStorage, 'teatalk.name') || '');
     if (state.embed) els.exitBtn.classList.remove('hidden');
-    els.exitBtn.addEventListener('click', () => { location.href = 'toutouliao://exit'; });
+    els.exitBtn.addEventListener('click', () => { location.href = 'teatalk://exit'; });
 
     if (state.name) {
       els.nameInput.value = state.name;
@@ -154,7 +154,7 @@
       return;
     }
     state.name = name;
-    storageSet(localStorage, 'toutouliao.name', name);
+    storageSet(localStorage, 'teatalk.name', name);
     els.joinError.textContent = '';
     hideJoin();
     connect();
@@ -460,7 +460,7 @@
       state.pending.set(clientMsgId, pending);
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', '/api/upload?name=' + encodeURIComponent(file.name));
-      xhr.setRequestHeader('X-TouTouLiao-Session', state.token || '');
+      xhr.setRequestHeader('X-TeaTalk-Session', state.token || '');
       xhr.setRequestHeader('X-Client-Msg-Id', clientMsgId);
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
       xhr.upload.onprogress = (event) => {
