@@ -58,11 +58,13 @@ APK输出/茶室/v<versionName>_vc<versionCode>/茶室-v<versionName>-vc<version
 1. 更新 `CHANGELOG.md` 和 `docs/release-notes/<version>.md`
 2. `./gradlew :app:assembleDebug`，确认版本化 APK
 3. 提交源码并 push
-4. 创建 GitHub Release，上传版本化 APK，并把更新日志作为 release notes：
+4. 创建 GitHub Release，上传版本化 APK，并把更新日志作为 release notes。
+   GitHub 会去掉中文附件名，上传前先复制成 ASCII 文件名：
 
 ```bash
+cp "<中文版本化 APK>" "/tmp/TeaTalk-v<version>-vc<code>-debug.apk"
 gh release create "v<version>" \
-  "<版本化 APK 路径>" \
+  "/tmp/TeaTalk-v<version>-vc<code>-debug.apk" \
   --title "茶室 <version>" \
   --notes-file "docs/release-notes/<version>.md" \
   --target main
