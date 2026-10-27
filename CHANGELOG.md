@@ -21,7 +21,7 @@
 
 - 包名 `com.vertin.teatalk`，显示名「茶室 / TeaTalk」
 - `versionCode = 7`，`versionName = 0.1.5`（版本号重置后的首个功能版本）
-- 版本化 APK：`TeaTalk-v0.1.5-vc7-20261027-103820-debug.apk`
+- APK 只保留在本地构建产物，不随 GitHub Release 上传
 
 ### 说明
 
