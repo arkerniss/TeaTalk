@@ -679,18 +679,37 @@
   }
 
   function syncViewportHeight() {
-    const height = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    const viewport = window.visualViewport;
+    const height = (viewport && viewport.height) || window.innerHeight || document.documentElement.clientHeight;
+    const top = (viewport && viewport.offsetTop) || 0;
     if (height > 0) {
       document.documentElement.style.setProperty('--app-height', Math.round(height) + 'px');
+      document.documentElement.style.setProperty('--app-top', Math.round(top) + 'px');
     }
+    // iOS Safari scrolls the whole page when an input near the bottom focuses.
+    // The app is fixed, so undo that scroll and keep the composer above the IME.
+    if (window.scrollY !== 0 || window.scrollX !== 0) {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function scheduleViewportSync() {
+    requestAnimationFrame(syncViewportHeight);
+    setTimeout(syncViewportHeight, 80);
+    setTimeout(syncViewportHeight, 250);
   }
 
   init();
   syncViewportHeight();
   window.addEventListener('resize', syncViewportHeight, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(syncViewportHeight, 150), { passive: true });
+  window.addEventListener('scroll', syncViewportHeight, { passive: true });
+  window.addEventListener('orientationchange', () => scheduleViewportSync(), { passive: true });
+  document.addEventListener('focusin', scheduleViewportSync, true);
+  document.addEventListener('focusout', scheduleViewportSync, true);
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', syncViewportHeight, { passive: true });
+    // On iOS the visual viewport can scroll independently; reposition #app.
+    window.visualViewport.addEventListener('scroll', syncViewportHeight, { passive: true });
   }
   setTimeout(syncViewportHeight, 80);
   setTimeout(syncViewportHeight, 400);

@@ -15,6 +15,16 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // Some networks terminate the TLS handshake to dl.google.com directly.
+        // Aliyun mirrors Google Maven and is tried first; Google remains a fallback.
+        maven {
+            url = uri("https://maven.aliyun.com/repository/google")
+            content {
+                includeGroupByRegex("androidx.*")
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+            }
+        }
         google()
         mavenCentral()
     }

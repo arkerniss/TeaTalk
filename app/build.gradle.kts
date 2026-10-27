@@ -15,8 +15,8 @@ android {
         applicationId = "com.vertin.teatalk"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.3.0"
+        versionCode = 7
+        versionName = "0.1.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -67,6 +67,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.zxing.core)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

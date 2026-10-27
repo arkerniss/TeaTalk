@@ -41,3 +41,15 @@
 - APK：14MB，versionCode 2 / 0.1.1-diag；归档 `APK输出/偷偷聊/2026-10-26_113106_diag/`。
 - 构建环境：`/tmp/toutouliao-sdk` 的 Android 37 platform/build-tools 曾被清空，已从 dl.google.com 重新补齐（license 已接受）；未下载模拟器。SDK 压缩包已删，保留 SDK 目录。
 - 待用户回报：默认地址、本机自检结果、系统浏览器测试、另一台设备 `/api/health`、复制诊断文本。
+
+## 2026-10-27 · 0.1.5：自动发现 + 扫码加入
+
+- 版本重置为 0.1.5 / versionCode 7；旧版归档保留。
+- `core/discovery`：UDP 18522 room beacon/probe、广播地址枚举、hostId 去重、7 秒 TTL；新增 7 个 JVM 测试。
+- App 拆分为首页 `MainActivity`、主机 `HostActivity`、加入 `JoinActivity`、扫码 `ScanQrActivity`。
+- 主机开房后启动 `LanBeaconPublisher`；加入端 `LanBeaconScanner` + `MulticastLock` 自动列房间。
+- 加入端支持扫码、手动地址、`/api/health` 校验；扫码用 CameraX + ZXing。
+- Manifest 增加 CAMERA、CHANGE_WIFI_MULTICAST_STATE、相机 optional feature。
+- 保留 Web 键盘布局修复；版本化 APK `茶室-v0.1.5-vc7-*.apk`。
+- 构建环境：Google Maven 直连 TLS 偶发被断开，settings 增加 Aliyun Google Maven 镜像，Google 仍为 fallback。
+- 待真机验收：两台设备自动发现/加入；多设备扩展；扫码权限拒绝兜底。
