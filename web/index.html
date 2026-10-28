@@ -24,6 +24,7 @@
         <span class="users-dot" aria-hidden="true"></span>
         <span id="user-count">0</span>
       </button>
+      <button id="menu-btn" class="icon-btn menu-btn" aria-label="更多" title="更多">⋯</button>
     </header>
 
     <div id="conn-banner" class="banner hidden" role="status"></div>
@@ -63,6 +64,52 @@
           <button type="button" class="icon-btn" data-close="users" aria-label="关闭">×</button>
         </div>
         <ul id="users-list"></ul>
+      </div>
+    </div>
+
+    <div id="menu-sheet" class="sheet-wrap hidden" aria-label="更多功能">
+      <div class="sheet-backdrop" data-close="menu"></div>
+      <div class="sheet menu-sheet">
+        <div class="sheet-head">
+          <span>更多</span>
+          <button type="button" class="icon-btn" data-close="menu" aria-label="关闭">×</button>
+        </div>
+        <div class="menu-list">
+          <button type="button" id="menu-files" class="menu-item">
+            <span class="menu-icon" aria-hidden="true">🗂</span>
+            <span class="menu-copy"><strong>文件</strong><small>7 天历史文件 · 右滑可延期</small></span>
+            <span class="menu-chevron" aria-hidden="true">›</span>
+          </button>
+          <button type="button" id="menu-clear" class="menu-item danger">
+            <span class="menu-icon" aria-hidden="true">🧹</span>
+            <span class="menu-copy"><strong>清除聊天记录</strong><small>只清聊天，文件仍保留</small></span>
+            <span class="menu-chevron" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <section id="files-view" class="files-view hidden" aria-label="文件">
+      <header class="files-head">
+        <button type="button" id="files-back" class="icon-btn" aria-label="返回">←</button>
+        <div class="files-title">
+          <strong>文件</strong>
+          <span>保留 7 天 · 右滑可延期</span>
+        </div>
+        <button type="button" id="files-refresh" class="icon-btn" aria-label="刷新">↻</button>
+      </header>
+      <div id="files-list" class="files-list"></div>
+    </section>
+
+    <div id="clear-dialog" class="modal-wrap hidden" role="dialog" aria-modal="true" aria-label="清除聊天记录">
+      <div class="modal-backdrop" data-close="clear"></div>
+      <div class="modal-card">
+        <h2>清除聊天记录？</h2>
+        <p>聊天里的文字和文件卡片会清空；文件仍保留在「文件」里，7 天内可下载或延期。</p>
+        <div class="modal-actions">
+          <button type="button" class="modal-cancel" data-close="clear">取消</button>
+          <button type="button" id="clear-confirm" class="modal-confirm">清除</button>
+        </div>
       </div>
     </div>
 

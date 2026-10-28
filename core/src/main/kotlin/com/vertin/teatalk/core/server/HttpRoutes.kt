@@ -16,6 +16,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.webSocket
@@ -123,16 +124,80 @@ fun Application.installRoutes(
             }
         }
 
+        get("/api/library") {
+            call.addSecurityHeaders()
+            val user = hub.userForToken(call.request.headers[SESSION_HEADER])
+            if (user == null) {
+                call.respondText(
+                    """{"error":"session required"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.Unauthorized,
+                )
+                return@get
+            }
+            call.respondText(
+                gson.toJson(mapOf("files" to engine.listLibrary())),
+                ContentType.Application.Json,
+            )
+        }
+
+        post("/api/library/{fileId}/extend") {
+            call.addSecurityHeaders()
+            val user = hub.userForToken(call.request.headers[SESSION_HEADER])
+            if (user == null) {
+                call.respondText(
+                    """{"error":"session required"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.Unauthorized,
+                )
+                return@post
+            }
+            val fileId = call.parameters["fileId"]
+            val record = if (fileId == null) null else engine.extendFile(fileId)
+            if (record == null) {
+                call.respondText(
+                    """{"error":"file not found"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.NotFound,
+                )
+                return@post
+            }
+            call.respondText(
+                gson.toJson(mapOf("file" to record)),
+                ContentType.Application.Json,
+            )
+        }
+
+        post("/api/room/clear") {
+            call.addSecurityHeaders()
+            val user = hub.userForToken(call.request.headers[SESSION_HEADER])
+            if (user == null) {
+                call.respondText(
+                    """{"error":"session required"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.Unauthorized,
+                )
+                return@post
+            }
+            engine.clearHistory()
+            call.respondText(
+                gson.toJson(mapOf("ok" to true, "epoch" to engine.currentRoom().epoch)),
+                ContentType.Application.Json,
+            )
+        }
+
         get("/api/files/{fileId}/{name?}") {
             call.addSecurityHeaders()
             val fileId = call.parameters["fileId"] ?: return@get call.respond(HttpStatusCode.NotFound)
-            val message = engine.findFileMessage(fileId)
+            val record = engine.findFile(fileId)
             val file = engine.file(fileId)
-            if (message == null || message.file == null || file == null) {
+            if (record == null || file == null) {
+                // Remove an expired record/file if this request raced the sweeper.
+                engine.purgeExpiredFiles()
                 call.respond(HttpStatusCode.NotFound)
                 return@get
             }
-            call.serveFile(file, message.file.name, message.file.size, message.file.mime)
+            call.serveFile(file, record.name, record.size, record.mime)
         }
 
         get("/") {

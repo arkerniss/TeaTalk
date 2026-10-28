@@ -11,7 +11,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class LanServer(
@@ -22,6 +24,7 @@ class LanServer(
         roomName = config.roomName,
         appVersion = config.appVersion,
         maxFileBytes = config.maxFileBytes,
+        fileRetentionMs = config.fileRetentionMs,
     )
     val state = engine.state
     val port: Int get() = config.port
@@ -36,6 +39,12 @@ class LanServer(
         scope.launch {
             engine.events.collect { event -> hub.broadcast(event) }
         }
+        scope.launch {
+            while (isActive) {
+                delay(5L * 60L * 1000L)
+                runCatching { engine.purgeExpiredFiles() }
+            }
+        }
         server = embeddedServer(CIO, host = "0.0.0.0", port = config.port) {
             install(WebSockets) {
                 pingPeriodMillis = 20_000L
@@ -46,7 +55,7 @@ class LanServer(
         }.start(wait = false)
     }
 
-    suspend fun clear() = engine.clear()
+    suspend fun clear() = engine.clearHistory()
 
     fun stop() {
         server?.stop(500, 1_000)

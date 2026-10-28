@@ -10,10 +10,12 @@
   - 主机用 WebView 打开聊天页；加入端也用同一个 Web 聊天页
   - 加入端通过 **UDP 广播自动发现**附近房间；兜底支持 **CameraX 扫二维码** 和手动输入地址
   - 支持文字、文件上传/下载、图片预览
+  - 聊天页右上角菜单：「文件」历史文件库、「清除聊天记录」
+  - 文件保留 7 天，右滑文件可延期 7 天；清除聊天记录不会删除文件
 - `core/`：纯 JVM 引擎、服务器、发现协议
-  - `ChatEngine`：用户、消息、文件、房间 epoch
-  - JSONL 消息日志、文件落盘、WebSocket hub
-  - Ktor HTTP/WS：`/api/health`、`/api/upload`、`/api/files/...`、`/ws`
+  - `ChatEngine`：用户、消息、独立文件库、房间 epoch
+  - JSONL 消息日志、文件落盘、文件库索引、WebSocket hub
+  - Ktor HTTP/WS：`/api/health`、`/api/upload`、`/api/files/...`、`/api/library`、`/api/room/clear`、`/ws`
   - 发现协议：UDP `18522`，room beacon + probe
 - `devserver/`：本地 JVM 开发服务器，方便用浏览器调试 Web 聊天页
 - `web/`：唯一一份 Web 聊天 UI（主机 WebView 与所有浏览器共用）
@@ -50,7 +52,7 @@ APK输出/茶室/v<versionName>_vc<versionCode>/茶室-v<versionName>-vc<version
 - **真正构建 APK 时：递增第三位**，例如 `0.1.6`，第四位归零。
 - 第二位只有用户明确要求时才更新（例如 `0.2.0`），同时第三位归 0。
 - `versionCode` 是 Android 安装顺序号，每次准备构建时单调递增，不随显示版本重置。
-- 当前状态：最近构建/Release 是 `0.1.5`；当前源码（未构建）是 `0.1.5.1`。
+- 当前状态：最近构建/Release 是 `0.1.5`；当前源码（未构建）是 `0.1.5.2`。
 
 ## 发布 / Release
 
@@ -83,7 +85,8 @@ devserver/build/install/devserver/bin/devserver
 - 端口 `8520`，发现端口 `18522`；局域网明文 HTTP，仅适合可信网络。
 - 当前无前台服务/后台保活：开房期间主机 App 需保持前台。
 - 发现包未签名、未做 PIN；显示后需要用户点选，加入前会做 `/api/health` 校验。
-- 文件保存在主机 App 私有目录；清空/卸载会删除。
+- 文件保存在主机 App 私有目录，默认保留 7 天；过期文件在服务器运行时定时清理，主机重启后补清理。
+- 「清除聊天记录」只清文字/文件消息卡片，不删除文件库；文件仍可在「文件」页下载或延期。
 - iOS/浏览器端继续使用二维码或手动地址，不参与 UDP 自动发现。
 
 ## 文档

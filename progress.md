@@ -53,3 +53,11 @@
 - 保留 Web 键盘布局修复；版本化 APK `茶室-v0.1.5-vc7-*.apk`。
 - 构建环境：Google Maven 直连 TLS 偶发被断开，settings 增加 Aliyun Google Maven 镜像，Google 仍为 fallback。
 - 待真机验收：两台设备自动发现/加入；多设备扩展；扫码权限拒绝兜底。
+
+## 2026-10-28 · 0.1.5.2（未构建）
+
+- Web 聊天页右上角二级菜单：文件、清除聊天记录。
+- 文件库独立于消息日志：7 天保留、启动/定时/查询清理、右滑延期 7 天。
+- 清除聊天记录只清消息和文件卡片，文件库/物理文件保留；下载改为按文件库解析。
+- 新增 `/api/library`、`/api/library/{id}/extend`、`/api/room/clear`、WS `files-changed`。
+- `:core:test` 通过；devserver 浏览器验证菜单/文件页/右滑/清除历史；未构建 APK、未创建 Release。

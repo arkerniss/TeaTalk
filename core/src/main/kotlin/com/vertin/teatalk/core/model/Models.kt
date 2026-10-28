@@ -20,6 +20,17 @@ data class FileMeta(
     val mime: String,
 )
 
+data class FileRecord(
+    val id: String,
+    val name: String,
+    val mime: String,
+    val size: Long,
+    val uploadedAt: Long,
+    val expiresAt: Long,
+    val uploaderId: String? = null,
+    val uploaderName: String? = null,
+)
+
 data class Message(
     val id: Long,
     val kind: MessageKind,
@@ -67,4 +78,5 @@ sealed interface RoomEvent {
     data class UsersChanged(val users: List<PublicUser>) : RoomEvent
     data class RoomChanged(val room: RoomInfo) : RoomEvent
     data class Cleared(val room: RoomInfo) : RoomEvent
+    data object FilesChanged : RoomEvent
 }

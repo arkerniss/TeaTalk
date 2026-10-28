@@ -141,6 +141,7 @@ class WsHub(private val engine: ChatEngine) {
                 "room" to event.room,
             ),
         )
+        RoomEvent.FilesChanged -> gson.toJson(mapOf("t" to "files-changed"))
     }
 
     private class WsSession(
