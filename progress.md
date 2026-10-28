@@ -82,3 +82,9 @@
 - 聊天页加入环境漂移、消息入场、面板/弹窗进场、发送按钮按压等轻量动画。
 - HostActivity 增加 HostKeepAliveService：前台服务通知 + PARTIAL_WAKE_LOCK + Wi-Fi 高性能锁。
 - Android 13+ 请求通知权限；构建 versionCode 9 / 0.1.7；Release 只写更新日志。
+
+## 2026-10-28 · 0.1.7.1（未构建）
+
+- 回退 Web 聊天页液态玻璃和动画，恢复 `a258fb4` 的 Web CSS；文件库/清除聊天等功能保留。
+- 保留原生 Liquid Glass 与主机前台服务保活。
+- 未构建 APK、未创建 Release。
