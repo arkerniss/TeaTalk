@@ -13,15 +13,20 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import com.vertin.teatalk.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 /**
- * Keeps the host process alive while the room is running. The server itself is
- * still owned by HostActivity; this service prevents the process from being
- * killed and keeps Wi-Fi/CPU available while the host is in the background.
+ * Owns the process lifetime for the LAN room. HostRuntime owns the Ktor server,
+ * so this service only has to keep the process and Wi-Fi awake.
  */
 class HostKeepAliveService : Service() {
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
@@ -31,7 +36,11 @@ class HostKeepAliveService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_NOT_STICKY
+        // Also covers START_STICKY recreation after the process was killed.
+        scope.launch {
+            runCatching { HostRuntime.start(applicationContext) }
+        }
+        return START_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -40,6 +49,8 @@ class HostKeepAliveService : Service() {
     }
 
     override fun onDestroy() {
+        scope.cancel()
+        HostRuntime.stop()
         releaseLocks()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
@@ -67,7 +78,9 @@ class HostKeepAliveService : Service() {
         val open = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, HostActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            Intent(this, HostActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP,
+            ),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)

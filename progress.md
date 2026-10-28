@@ -94,3 +94,10 @@
 - 移除原生 Liquid Glass 和 `backdrop` 依赖；首页/加入/主机/扫码恢复 Material UI。
 - 保留主机前台服务保活、文件库、清除聊天、茶杯图标。
 - Web 保持无玻璃/无动画版本；未构建 APK、未创建 Release。
+
+## 2026-10-28 · 0.1.8（构建）
+
+- 修复切后台/通知栏打开时房间服务器消失导致 `ERR_CONNECTION_REFUSED`。
+- 新增 `HostRuntime`（进程级 LanServer + discovery），HostActivity 只负责 UI；FGS 管理进程和网络锁。
+- Service `START_STICKY` 重启补拉起；通知 `CLEAR_TOP` 回到已有 HostActivity；新增「关闭房间」。
+- 构建 versionCode 10 / 0.1.8；Release 只写更新日志、不上传 APK。

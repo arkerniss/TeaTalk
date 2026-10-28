@@ -1,5 +1,22 @@
 # 更新日志
 
+## 0.1.8 — 2026-10-28
+
+### 修复
+
+- 修复主机切后台后房间掉线、通知栏点开聊天页 `ERR_CONNECTION_REFUSED`
+- 将 `LanServer` 从 HostActivity 内存迁移到进程级 `HostRuntime`，由前台服务负责生命周期
+- 前台服务被杀后 `START_STICKY` 重启时自动重新拉起房间
+- 通知点击使用 `CLEAR_TOP`，回到已有 HostActivity，不再重复创建服务器
+- 新增「关闭房间」按钮：退到首页是后台继续开房，关闭房间才真正停止服务
+- 保留 Material UI、Web 轻量样式、文件库、清除聊天记录和茶杯图标
+
+### 说明
+
+- 本版本构建 versionCode 10 / versionName 0.1.8
+- Release 只包含更新日志，不上传 APK
+- 极端厂商省电/force-stop 下仍无法保证永久后台运行
+
 ## 0.1.7.2 — 2026-10-28（未构建）
 
 ### 回退

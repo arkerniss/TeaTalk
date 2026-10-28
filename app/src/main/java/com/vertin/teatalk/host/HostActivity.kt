@@ -1,11 +1,8 @@
 package com.vertin.teatalk.host
 
 import androidx.activity.compose.BackHandler
-import com.vertin.teatalk.AndroidAssetSource
 import com.vertin.teatalk.BuildConfig
-import com.vertin.teatalk.discovery.AndroidLanDiscovery
 import com.vertin.teatalk.ui.TeaTalkTheme
-import java.util.UUID
 import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -73,8 +70,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vertin.teatalk.chat.ChatActivity
-import com.vertin.teatalk.core.server.LanServer
-import com.vertin.teatalk.core.server.ServerConfig
 import com.vertin.teatalk.util.AddressKind
 import com.vertin.teatalk.util.LanCandidate
 import com.vertin.teatalk.util.NetworkAddresses
@@ -83,7 +78,6 @@ import com.vertin.teatalk.util.generateQrBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URLEncoder
@@ -122,20 +116,7 @@ class HostActivity : ComponentActivity() {
                 notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
-        val server = remember {
-            LanServer(
-                ServerConfig(
-                    port = 8520,
-                    dataDir = File(filesDir, "teatalk"),
-                    assetSource = AndroidAssetSource(applicationContext.assets),
-                    roomName = "我的局域网",
-                    appId = "teatalk",
-                    appVersion = BuildConfig.VERSION_NAME,
-                ),
-            )
-        }
-        val discovery = remember { AndroidLanDiscovery(applicationContext) }
-        val hostId = remember { UUID.randomUUID().toString() }
+        val server = remember { HostRuntime.ensureServer(applicationContext) }
         var attempt by remember { mutableIntStateOf(0) }
         var running by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
@@ -156,28 +137,10 @@ class HostActivity : ComponentActivity() {
         LaunchedEffect(attempt) {
             running = false
             error = null
-            discovery.stopAdvertising()
             runCatching {
-                withContext(Dispatchers.IO) { server.start() }
+                withContext(Dispatchers.IO) { HostRuntime.start(applicationContext) }
                 running = true
-                runCatching {
-                    withContext(Dispatchers.IO) {
-                        discovery.startAdvertising(
-                            roomName = server.state.value.room.name.ifBlank { "我的局域网" },
-                            port = server.port,
-                            hostId = hostId,
-                        )
-                    }
-                }
             }.onFailure { error = it.message ?: it::class.java.simpleName }
-        }
-
-        DisposableEffect(Unit) {
-            onDispose {
-                discovery.close()
-                runCatching { server.stop() }
-                runCatching { context.stopService(Intent(context, HostKeepAliveService::class.java)) }
-            }
         }
 
         LaunchedEffect(running) {
@@ -270,7 +233,22 @@ class HostActivity : ComponentActivity() {
                     .padding(horizontal = 22.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                TextButton(onClick = { finish() }) { Text("← 返回首页") }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(onClick = { finish() }) { Text("← 返回首页") }
+                    if (running) {
+                        TextButton(
+                            onClick = {
+                                HostRuntime.stop()
+                                context.stopService(Intent(context, HostKeepAliveService::class.java))
+                                finish()
+                            },
+                        ) { Text("关闭房间") }
+                    }
+                }
                 Text(
                     "茶室",
                     style = MaterialTheme.typography.headlineLarge,
