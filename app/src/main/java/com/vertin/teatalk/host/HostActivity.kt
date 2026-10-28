@@ -4,14 +4,7 @@ import androidx.activity.compose.BackHandler
 import com.vertin.teatalk.AndroidAssetSource
 import com.vertin.teatalk.BuildConfig
 import com.vertin.teatalk.discovery.AndroidLanDiscovery
-import com.kyant.backdrop.Backdrop
 import com.vertin.teatalk.ui.TeaTalkTheme
-import com.vertin.teatalk.ui.glass.setTeaSystemBarsLight
-import com.vertin.teatalk.ui.glass.GlassButton
-import com.vertin.teatalk.ui.glass.GlassCard
-import com.vertin.teatalk.ui.glass.GlassTextButton
-import com.vertin.teatalk.ui.glass.TeaGlassScaffold
-import com.vertin.teatalk.ui.glass.TeaInk
 import java.util.UUID
 import android.Manifest
 import android.content.ClipData
@@ -35,7 +28,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -106,18 +98,17 @@ class HostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        window.setTeaSystemBarsLight()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             BackHandler { finish() }
             TeaTalkTheme {
-                TeaGlassScaffold { backdrop -> HostScreen(backdrop) }
+                HostScreen()
             }
         }
     }
 
     @Composable
-    private fun HostScreen(backdrop: Backdrop) {
+    private fun HostScreen() {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val notificationPermission = rememberLauncherForActivityResult(
@@ -270,7 +261,7 @@ class HostActivity : ComponentActivity() {
             appendLine("提示: 旧版测试端口 18520 已不再监听，新版端口是 ${server.port}。")
         }
 
-        Box(Modifier.fillMaxSize()) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -279,9 +270,7 @@ class HostActivity : ComponentActivity() {
                     .padding(horizontal = 22.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                GlassTextButton(backdrop = backdrop, onClick = { finish() }) {
-                    Text("← 返回首页", color = TeaInk)
-                }
+                TextButton(onClick = { finish() }) { Text("← 返回首页") }
                 Text(
                     "茶室",
                     style = MaterialTheme.typography.headlineLarge,
@@ -295,9 +284,13 @@ class HostActivity : ComponentActivity() {
                 )
 
                 if (!running) {
-                    GlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    ) {
                         Column(
-                            Modifier.fillMaxWidth(),
+                            Modifier.fillMaxWidth().padding(20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
@@ -316,9 +309,7 @@ class HostActivity : ComponentActivity() {
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,
                                 )
-                                GlassButton(backdrop = backdrop, onClick = { attempt++ }) {
-                                    Text("重试", color = Color.White)
-                                }
+                                Button(onClick = { attempt++ }) { Text("重试") }
                             }
                         }
                     }
@@ -329,13 +320,13 @@ class HostActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.primary,
                     )
 
-                    GlassCard(
-                        backdrop = backdrop,
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        tint = Color.White.copy(alpha = 0.38f),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     ) {
                         Column(
-                            Modifier.fillMaxWidth(),
+                            Modifier.fillMaxWidth().padding(18.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
@@ -407,9 +398,13 @@ class HostActivity : ComponentActivity() {
                         }
                     }
 
-                    GlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    ) {
                         Column(
-                            Modifier.fillMaxWidth(),
+                            Modifier.fillMaxWidth().padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             Text(
@@ -469,8 +464,7 @@ class HostActivity : ComponentActivity() {
                 }
 
                 Spacer(Modifier.height(4.dp))
-                GlassButton(
-                    backdrop = backdrop,
+                Button(
                     onClick = {
                         val encodedName = URLEncoder.encode("房主", StandardCharsets.UTF_8.toString())
                         val chatUrl = "http://127.0.0.1:${server.port}/?name=$encodedName&embed=1"
@@ -480,9 +474,9 @@ class HostActivity : ComponentActivity() {
                         )
                     },
                     enabled = running,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
                 ) {
-                    Text("进入聊天", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text("进入聊天", fontWeight = FontWeight.SemiBold)
                 }
 
                 Text(
