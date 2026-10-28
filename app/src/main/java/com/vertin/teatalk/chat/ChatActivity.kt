@@ -1,12 +1,10 @@
 package com.vertin.teatalk.chat
 
-import android.app.DownloadManager
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
+import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.DownloadListener
@@ -24,16 +22,32 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.vertin.teatalk.BuildConfig
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
+import com.vertin.teatalk.ui.TeaSettings
+import com.vertin.teatalk.ui.TeaTalkTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 class ChatActivity : ComponentActivity() {
     private var webView: WebView? = null
     private var pendingFileCallback: ValueCallback<Array<Uri>>? = null
+
+    /** Streams downloads itself instead of handing them to the system download service. */
+    private lateinit var downloader: InAppDownloader
+
+    /** Compose overlay stacked above the WebView; sized by [applyOverlayLayout]. */
+    private var overlayView: ComposeView? = null
+
+    /** Expanded state of the download sheet; set when a download starts. */
+    private val sheetExpanded = MutableStateFlow(false)
 
     private val fileChooserLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -46,7 +60,11 @@ class ChatActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val url = intent.getStringExtra(EXTRA_URL) ?: run {
+        // Process-wide, like HostRuntime: leaving the chat page must not abort a transfer
+        // that is already streaming.
+        downloader = InAppDownloader.get(this)
+
+        var url = intent.getStringExtra(EXTRA_URL) ?: run {
             finish()
             return
         }
@@ -54,11 +72,15 @@ class ChatActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
-        // The chat page follows the system theme (prefers-color-scheme), so the
-        // WebView ground and the system bar icons have to follow it too.
-        val dark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
-            Configuration.UI_MODE_NIGHT_YES
+        // The chat page follows the app appearance preference, so the WebView ground,
+        // the system bar icons and the download sheet all agree with it.
+        val dark = TeaSettings.isDark(this)
         val ground = if (dark) PAPER_DARK else PAPER_LIGHT
+        // A pinned theme is forced onto the page once, before the first load; the
+        // system case keeps the page's own prefers-color-scheme handling.
+        TeaSettings.webThemeParam(this)?.let { theme ->
+            url += (if (url.contains('?')) "&" else "?") + "theme=" + theme
+        }
 
         // Plain View hierarchy: a WebView that explicitly MATCH_PARENTs the window.
         // Compose's AndroidView was leaving the WebView at its content height on some devices.
@@ -84,7 +106,25 @@ class ChatActivity : ComponentActivity() {
             target.setPadding(bars.left, bars.top, bars.right, bottomInset)
             insets
         }
+        // The download overlay floats over the untouched WebView. The root padding
+        // above already keeps it clear of the system bars, so the Compose side adds none.
+        // Its size follows applyOverlayLayout(): gone while idle, a pill-sized
+        // WRAP_CONTENT box while collapsed (so the page keeps its touches), full width
+        // for the sheet.
+        val overlay = createDownloadOverlay(dark)
+        overlayView = overlay
+        root.addView(
+            overlay,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL,
+            ),
+        )
         setContentView(root)
+        lifecycleScope.launch { downloader.tasks.collect { applyOverlayLayout() } }
+        lifecycleScope.launch { sheetExpanded.collect { applyOverlayLayout() } }
+        applyOverlayLayout()
 
         // Keep the status bar time/battery readable against the page ground.
         WindowCompat.getInsetsController(window, root).apply {
@@ -183,7 +223,14 @@ class ChatActivity : ComponentActivity() {
             }
         }
         view.setDownloadListener(DownloadListener { downloadUrl, _, contentDisposition, mimeType, _ ->
-            handleDownload(downloadUrl, contentDisposition, mimeType)
+            // Deliberately not the system download service: the engine streams the file
+            // into the app's own Download directory and the sheet shows the progress.
+            downloader.enqueue(
+                url = downloadUrl,
+                name = guessDownloadFileName(downloadUrl, contentDisposition),
+                mime = mimeType,
+            )
+            sheetExpanded.value = true
         })
         webView = view
         view.clearCache(true)
@@ -191,7 +238,71 @@ class ChatActivity : ComponentActivity() {
         return view
     }
 
+    /**
+     * Compose layer stacked on the WebView: only the download sheet or its collapsed
+     * pill occupies space, so the page stays touchable everywhere above it.
+     */
+    private fun createDownloadOverlay(dark: Boolean): ComposeView =
+        ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                TeaTalkTheme(darkTheme = dark) {
+                    val downloads by downloader.tasks.collectAsState()
+                    val expanded by sheetExpanded.collectAsState()
+                    DownloadOverlay(
+                        downloads = downloads,
+                        expanded = expanded,
+                        onExpand = { sheetExpanded.value = true },
+                        onCollapse = { sheetExpanded.value = false },
+                        onCancel = { downloader.cancel(it) },
+                        onOpen = { openDownloadedFile(it) },
+                        onDismissTask = { downloader.dismiss(it) },
+                    )
+                }
+            }
+        }
+
+    /** Opens a finished (API 29+) download through the MediaStore uri the engine kept. */
+    private fun openDownloadedFile(task: DownloadTask) {
+        val uri = task.contentUri ?: return
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, task.mime?.takeIf { it.isNotBlank() } ?: "*/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        runCatching { startActivity(intent) }.onFailure {
+            Toast.makeText(this, "没有可以打开这个文件的应用", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Keeps the overlay from stealing touches: hidden while there is nothing to show,
+     * pill-sized while collapsed (the WebView keeps everything around it), full width for
+     * the sheet. The pill's clearance lives in the layout margin rather than in Compose
+     * padding so the transparent ComposeView stops above the page's composer.
+     */
+    private fun applyOverlayLayout() {
+        val view = overlayView ?: return
+        val hasTasks = downloader.tasks.value.isNotEmpty()
+        view.visibility = if (hasTasks) View.VISIBLE else View.GONE
+        if (!hasTasks) return
+        val params = view.layoutParams as? FrameLayout.LayoutParams ?: return
+        val expanded = sheetExpanded.value
+        params.width = if (expanded) {
+            ViewGroup.LayoutParams.MATCH_PARENT
+        } else {
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        }
+        params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+        params.bottomMargin = if (expanded) 0 else pillClearancePx()
+        view.layoutParams = params
+    }
+
+    private fun pillClearancePx(): Int = (PILL_CLEARANCE_DP * resources.displayMetrics.density).toInt()
+
     override fun onDestroy() {
+        // The downloader is process-wide: an in-flight transfer survives leaving this page.
+        overlayView = null
         webView?.apply {
             stopLoading()
             loadUrl("about:blank")
@@ -199,39 +310,6 @@ class ChatActivity : ComponentActivity() {
         }
         webView = null
         super.onDestroy()
-    }
-
-    private fun handleDownload(url: String, contentDisposition: String?, mimeType: String?) {
-        val filename = guessFileName(url, contentDisposition)
-        runCatching {
-            val request = DownloadManager.Request(Uri.parse(url))
-                .setMimeType(mimeType)
-                .setTitle(filename)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setAllowedOverMetered(false)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename)
-            } else {
-                request.setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, filename)
-            }
-            getSystemService(DownloadManager::class.java)?.enqueue(request)
-            Toast.makeText(this, "开始下载 $filename", Toast.LENGTH_SHORT).show()
-        }.onFailure {
-            Toast.makeText(this, "下载失败：${it.message}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun guessFileName(url: String, contentDisposition: String?): String {
-        val fromHeader = contentDisposition?.let { header ->
-            Regex("filename\\*=UTF-8''([^;]+)").find(header)?.groupValues?.getOrNull(1)
-                ?.let { encoded -> runCatching { URLDecoder.decode(encoded, StandardCharsets.UTF_8.toString()) }.getOrNull() }
-                ?: Regex("filename=\"?([^\";]+)\"?").find(header)?.groupValues?.getOrNull(1)
-        }
-        val fallback = Uri.parse(url).lastPathSegment
-        val raw = fromHeader ?: fallback ?: "download"
-        return raw.replace(Regex("[\\\\/:*?\"<>|\\u0000-\\u001f]"), "_")
-            .take(120)
-            .ifBlank { "download" }
     }
 
     companion object {
@@ -242,5 +320,8 @@ class ChatActivity : ComponentActivity() {
 
         /** Must match the dark --paper token in web/style.css. */
         private const val PAPER_DARK = 0xFF121110.toInt()
+
+        /** Clearance above the page composer; the web composer is ~64–88dp tall. */
+        private const val PILL_CLEARANCE_DP = 78f
     }
 }

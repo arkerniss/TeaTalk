@@ -47,33 +47,91 @@
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
+/* Dark values live here once. They are mapped twice below: once for the system
+   preference, once for an explicit data-theme attribute — the Android app can
+   force light/dark regardless of the system because it forwards its own setting
+   as ?theme=light|dark (see theme-boot.js). */
+:root {
+  --d-paper: #121110;
+  --d-raised: #1b1a18;
+  --d-sunken: #24221f;
+  --d-deep: #2e2b26;
+
+  --d-ink: #f2eee5;
+  --d-ink-soft: #c4beb2;
+  --d-ink-muted: #938c7e;
+
+  --d-rule: #2e2b27;
+
+  --d-clay: #d9784f;
+  --d-clay-ink: #1a1008;
+  --d-clay-soft: #2c1d15;
+
+  --d-danger: #e28a78;
+  --d-danger-soft: #2e1c18;
+
+  --d-overlay: rgba(0, 0, 0, 0.62);
+  --d-overlay-strong: rgba(6, 6, 5, 0.95);
+  --d-lift: 0 18px 40px -22px rgba(0, 0, 0, 0.72);
+  --d-lift-sm: 0 6px 18px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* Follow the system unless the page has been pinned to light. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --paper: #121110;
-    --raised: #1b1a18;
-    --sunken: #24221f;
-    --deep: #2e2b26;
+    --paper: var(--d-paper);
+    --raised: var(--d-raised);
+    --sunken: var(--d-sunken);
+    --deep: var(--d-deep);
 
-    --ink: #f2eee5;
-    --ink-soft: #c4beb2;
-    --ink-muted: #938c7e;
+    --ink: var(--d-ink);
+    --ink-soft: var(--d-ink-soft);
+    --ink-muted: var(--d-ink-muted);
 
-    --rule: #2e2b27;
+    --rule: var(--d-rule);
 
-    --clay: #d9784f;
-    --clay-ink: #1a1008;
-    --clay-soft: #2c1d15;
+    --clay: var(--d-clay);
+    --clay-ink: var(--d-clay-ink);
+    --clay-soft: var(--d-clay-soft);
 
-    --danger: #e28a78;
-    --danger-soft: #2e1c18;
+    --danger: var(--d-danger);
+    --danger-soft: var(--d-danger-soft);
 
-    --overlay: rgba(0, 0, 0, 0.62);
-    --overlay-strong: rgba(6, 6, 5, 0.95);
-    --lift: 0 18px 40px -22px rgba(0, 0, 0, 0.72);
-    --lift-sm: 0 6px 18px -12px rgba(0, 0, 0, 0.6);
+    --overlay: var(--d-overlay);
+    --overlay-strong: var(--d-overlay-strong);
+    --lift: var(--d-lift);
+    --lift-sm: var(--d-lift-sm);
   }
+}
+
+/* Pinned dark wins over a light system preference. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: var(--d-paper);
+  --raised: var(--d-raised);
+  --sunken: var(--d-sunken);
+  --deep: var(--d-deep);
+
+  --ink: var(--d-ink);
+  --ink-soft: var(--d-ink-soft);
+  --ink-muted: var(--d-ink-muted);
+
+  --rule: var(--d-rule);
+
+  --clay: var(--d-clay);
+  --clay-ink: var(--d-clay-ink);
+  --clay-soft: var(--d-clay-soft);
+
+  --danger: var(--d-danger);
+  --danger-soft: var(--d-danger-soft);
+
+  --overlay: var(--d-overlay);
+  --overlay-strong: var(--d-overlay-strong);
+  --lift: var(--d-lift);
+  --lift-sm: var(--d-lift-sm);
 }
 
 /* ── reset ───────────────────────────────────────────────── */
@@ -669,17 +727,20 @@ button {
   border-color: var(--clay);
 }
 
+/* The input and both round buttons share one 34px rhythm so a single line of
+   text sits exactly level with the ＋ and ↑ glyphs. The input grows upward when
+   the text wraps (align-items: flex-end keeps the buttons on the baseline row). */
 #text-input {
   flex: 1;
-  min-height: 36px;
+  min-height: 34px;
   max-height: 128px;
   resize: none;
   border: 0;
   border-radius: var(--r-md);
   background: transparent;
-  padding: 8px 4px;
+  padding: 6px 4px;
   font-size: 16px;
-  line-height: 1.45;
+  line-height: 22px;
   outline: none;
   color: var(--ink);
 }
@@ -692,8 +753,12 @@ button {
   flex: 0 0 34px;
   width: 34px;
   height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 19px;
   font-weight: 400;
+  line-height: 1;
   color: var(--ink-muted);
   border-radius: 999px;
 }

@@ -12,6 +12,7 @@ import com.vertin.teatalk.ui.TeaPrimaryButton
 import com.vertin.teatalk.ui.TeaRule
 import com.vertin.teatalk.ui.TeaScreen
 import com.vertin.teatalk.ui.TeaSectionLabel
+import com.vertin.teatalk.ui.TeaSettings
 import com.vertin.teatalk.ui.TeaShapes
 import com.vertin.teatalk.ui.TeaSpinner
 import com.vertin.teatalk.ui.TeaStatusDot
@@ -37,7 +38,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,10 +54,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -74,12 +83,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vertin.teatalk.chat.ChatActivity
@@ -114,9 +126,14 @@ class HostActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        val dark = TeaSettings.isDark(this)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
         setContent {
             BackHandler { finish() }
-            TeaTalkTheme {
+            TeaTalkTheme(darkTheme = dark) {
                 HostScreen()
             }
         }
@@ -142,6 +159,7 @@ class HostActivity : ComponentActivity() {
         var running by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
         var refreshTick by remember { mutableIntStateOf(0) }
+        var advancedOpen by remember { mutableStateOf(false) }
         var inspection by remember { mutableStateOf<NetworkInspection?>(null) }
         var selectedIndex by remember { mutableIntStateOf(0) }
         var localHealth by remember { mutableStateOf<ProbeResult?>(null) }
@@ -315,6 +333,8 @@ class HostActivity : ComponentActivity() {
                     TeaStatusDot(active = true)
                     Spacer(Modifier.width(10.dp))
                     TeaMeta("房间已开启", color = palette.clay)
+                    Spacer(Modifier.width(8.dp))
+                    TeaMeta("· 在线 ${roomState.users.size} 人")
                 }
                 Spacer(Modifier.height(14.dp))
 
@@ -397,72 +417,9 @@ class HostActivity : ComponentActivity() {
                         }
                     }
                 }
-
-                Spacer(Modifier.height(24.dp))
-                TeaSectionLabel("本机自检")
-                Spacer(Modifier.height(8.dp))
-                HealthLine("127.0.0.1:${server.port}", localHealth)
-                if (selected != null) {
-                    HealthLine("${selected.ip}:${server.port}", lanHealth)
-                }
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = "旧版测试端口是 18520，新版是 ${server.port}；请确认另一台设备地址里是 :${server.port}。",
-                    style = TeaType.meta.copy(fontSize = 11.sp, lineHeight = 18.sp),
-                    color = palette.inkMuted,
-                )
-
-                Spacer(Modifier.height(24.dp))
-                TeaSectionLabel("网络地址")
-                Spacer(Modifier.height(6.dp))
-                if (candidates.isEmpty()) {
-                    Text(
-                        text = "没有可用 IPv4 地址。",
-                        style = TeaType.meta,
-                        color = palette.danger,
-                        modifier = Modifier.padding(vertical = 10.dp),
-                    )
-                } else {
-                    candidates.forEachIndexed { index, candidate ->
-                        AddressCandidateRow(
-                            candidate = candidate,
-                            selected = index == selectedIndex,
-                            recommended = index == inspection?.recommendedIndex,
-                            onClick = { selectedIndex = index },
-                        )
-                    }
-                }
-
-                val current = inspection
-                if (current != null && current.advice.isNotEmpty()) {
-                    Spacer(Modifier.height(10.dp))
-                    current.advice.forEach { line ->
-                        Text(
-                            text = "· $line",
-                            style = TeaType.meta.copy(fontSize = 11.sp, lineHeight = 18.sp),
-                            color = palette.inkSoft,
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(20.dp))
-                TeaGhostButton(
-                    text = "复制诊断信息",
-                    onClick = { copyText("茶室诊断", diagnosticsText()) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
-                Spacer(Modifier.height(20.dp))
-                Text(
-                    text = "让朋友连同一个 Wi-Fi，扫码或输入上面的网址。如果主机“系统浏览器测试”能打开、但另一台设备不行，优先排查 VPN、访客 Wi-Fi/AP 隔离或路由器防火墙。",
-                    style = TeaType.bodySmall,
-                    color = palette.inkSoft,
-                )
-                Spacer(Modifier.height(12.dp))
-                TeaMeta("在线 ${roomState.users.size} 人 · 局域网明文传输，请只在可信网络使用。")
             }
 
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(24.dp))
             TeaPrimaryButton(
                 text = "进入聊天",
                 onClick = {
@@ -476,7 +433,26 @@ class HostActivity : ComponentActivity() {
                 enabled = running,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(14.dp))
+
+            if (running) {
+                Spacer(Modifier.height(18.dp))
+                AdvancedSection(
+                    expanded = advancedOpen,
+                    onToggle = { advancedOpen = !advancedOpen },
+                ) {
+                    AdvancedPanel(
+                        port = server.port,
+                        localHealth = localHealth,
+                        lanHealth = lanHealth,
+                        selected = selected,
+                        inspection = inspection,
+                        selectedIndex = selectedIndex,
+                        onSelectIndex = { selectedIndex = it },
+                        onCopyDiagnostics = { copyText("茶室诊断", diagnosticsText()) },
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
             Text(
                 text = "开房后会自动开启前台服务保活：切到后台或锁屏也能继续开房，通知栏会显示「茶室正在开房」。极端省电策略下系统仍可能停止服务。文件保存在主机 App 私有目录，清空/卸载即删。",
                 style = TeaType.meta.copy(fontSize = 11.sp, lineHeight = 18.sp),
@@ -484,6 +460,158 @@ class HostActivity : ComponentActivity() {
             )
         }
     }
+}
+
+/**
+ * Collapsed-by-default 「高级选项」 expander: one hairline rule, one tappable mono
+ * row, then the advanced body. No card, no ripple; a 180ms vertical fade only.
+ */
+@Composable
+private fun AdvancedSection(
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val palette = LocalTeaPalette.current
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val background by animateColorAsState(
+        targetValue = if (pressed) palette.sunken else Color.Transparent,
+        label = "advancedHeaderBackground",
+    )
+    Column(Modifier.fillMaxWidth()) {
+        TeaRule()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .background(background)
+                .semantics {
+                    stateDescription = if (expanded) "已展开" else "已折叠"
+                }
+                .clickable(
+                    interactionSource = interaction,
+                    indication = null,
+                    role = Role.Button,
+                    onClick = onToggle,
+                )
+                .padding(vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = "高级选项",
+                    style = TeaType.label,
+                    color = palette.inkMuted,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "自检 · 网络地址 · 诊断",
+                    style = TeaType.meta.copy(fontSize = 11.sp, lineHeight = 16.sp),
+                    color = palette.inkMuted,
+                )
+            }
+            Text(
+                text = if (expanded) "∧" else "∨",
+                fontFamily = FontFamily.Monospace,
+                fontSize = 18.sp,
+                color = palette.clay,
+            )
+        }
+        AnimatedVisibility(
+            visible = expanded,
+            enter = expandVertically(animationSpec = tween(durationMillis = 180)) +
+                fadeIn(animationSpec = tween(durationMillis = 180)),
+            exit = shrinkVertically(animationSpec = tween(durationMillis = 180)) +
+                fadeOut(animationSpec = tween(durationMillis = 180)),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                content = content,
+            )
+        }
+    }
+}
+
+/**
+ * Everything that used to crowd the host console, now folded behind
+ * [AdvancedSection]: health probes, LAN address choice, diagnostics and advice.
+ */
+@Composable
+private fun AdvancedPanel(
+    port: Int,
+    localHealth: ProbeResult?,
+    lanHealth: ProbeResult?,
+    selected: LanCandidate?,
+    inspection: NetworkInspection?,
+    selectedIndex: Int,
+    onSelectIndex: (Int) -> Unit,
+    onCopyDiagnostics: () -> Unit,
+) {
+    val palette = LocalTeaPalette.current
+    val candidates = inspection?.candidates.orEmpty()
+    val advice = inspection?.advice.orEmpty()
+
+    TeaSectionLabel("本机自检")
+    Spacer(Modifier.height(8.dp))
+    HealthLine("127.0.0.1:${port}", localHealth)
+    if (selected != null) {
+        HealthLine("${selected.ip}:${port}", lanHealth)
+    }
+    Spacer(Modifier.height(10.dp))
+    Text(
+        text = "旧版测试端口是 18520，新版是 ${port}；请确认另一台设备地址里是 :${port}。",
+        style = TeaType.meta.copy(fontSize = 11.sp, lineHeight = 18.sp),
+        color = palette.inkMuted,
+    )
+
+    Spacer(Modifier.height(24.dp))
+    TeaSectionLabel("网络地址")
+    Spacer(Modifier.height(6.dp))
+    if (candidates.isEmpty()) {
+        Text(
+            text = "没有可用 IPv4 地址。",
+            style = TeaType.meta,
+            color = palette.danger,
+            modifier = Modifier.padding(vertical = 10.dp),
+        )
+    } else {
+        candidates.forEachIndexed { index, candidate ->
+            AddressCandidateRow(
+                candidate = candidate,
+                selected = index == selectedIndex,
+                recommended = index == inspection?.recommendedIndex,
+                onClick = { onSelectIndex(index) },
+            )
+        }
+    }
+
+    if (advice.isNotEmpty()) {
+        Spacer(Modifier.height(10.dp))
+        advice.forEach { line ->
+            Text(
+                text = "· $line",
+                style = TeaType.meta.copy(fontSize = 11.sp, lineHeight = 18.sp),
+                color = palette.inkSoft,
+            )
+        }
+    }
+
+    Spacer(Modifier.height(20.dp))
+    TeaGhostButton(
+        text = "复制诊断信息",
+        onClick = onCopyDiagnostics,
+        modifier = Modifier.fillMaxWidth(),
+    )
+
+    Spacer(Modifier.height(20.dp))
+    Text(
+        text = "让朋友连同一个 Wi-Fi，扫码或输入上面的网址。如果主机“系统浏览器测试”能打开、但另一台设备不行，优先排查 VPN、访客 Wi-Fi/AP 隔离或路由器防火墙。",
+        style = TeaType.bodySmall,
+        color = palette.inkSoft,
+    )
+    Spacer(Modifier.height(12.dp))
+    TeaMeta("局域网明文传输，请只在可信网络使用。")
 }
 
 @Composable

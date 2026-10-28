@@ -115,3 +115,18 @@
 - 验证：`:app:compileDebugKotlin` 通过、`:core:test` 通过；headless Chrome + CDP 走查浅色/暗色（聊天、加入、文件、菜单、用户、清除、灯箱），并回读 token 确认 `#FAF8F3`/`#121110`/`#AE5129`/`#D9784F` 生效、旧青绿 0 像素。
 - 截图更新为 390x844（scale 1）：`docs/screenshots/chat.png`、`join.png`、新增 `chat-dark.png`。
 - 待真机验收：无可用设备/模拟器，暗色系统栏、WebView 底色、启动白闪消除均未在真机确认。
+
+## 2026-10-28 · 0.1.9.1：内置下载器 / 外观设置 / 开房页简化
+
+- 新增进程级 `chat/InAppDownloader.kt`：`HttpURLConnection` 流式下载，64KB 缓冲、120ms 节流上报进度；单工作线程 + `Channel` 队列，`@Volatile` 持有活动连接以便即时取消。取代 `DownloadManager`（`app/` 内已无引用）。
+  - 存储：Android 10+ 直接写 `MediaStore.Downloads`（`RELATIVE_PATH=Download/茶室`，`IS_PENDING` 收尾），保留 content Uri 供「打开」；Android 8–9 先写 `cacheDir/download-tmp/*.part`，完成后复制进 `getExternalFilesDir(DOWNLOADS)`。无需存储权限，未改 Manifest、未加 FileProvider。
+  - 生命周期：进程级单例（`InAppDownloader.get(context)` + `SupervisorJob` scope），离开聊天页不中断；`close()` 改为仅供测试/显式全取消。
+- 新增 `chat/DownloadSheet.kt`：底部下载面板（文件名、已下载/总量、2dp 陶土进度条、取消/打开/移除）+ 收起态胶囊。未知总长用静态 30% 色块，不做不确定动画。
+  - 浮层尺寸由 `ChatActivity.applyOverlayLayout()` 驱动：无任务 GONE；收起 `WRAP_CONTENT` + 78dp bottomMargin；展开 `MATCH_PARENT`。这样透明 ComposeView 不会盖住 WebView 输入框抢触摸。
+- 新增 `ui/TeaSettings.kt`：`TeaThemeMode`（SYSTEM/LIGHT/DARK）+ SharedPreferences 持久化 + `isDark()` / `webThemeParam()`。
+- `MainActivity`：页头右上角等宽「设置」胶囊 → 底部设置面板（Dialog，`usePlatformDefaultWidth=false`），三选一外观；选中即存盘并重绘首页。`JoinActivity` / `ScanQrActivity` / `HostActivity` / `ChatActivity` 全部改为读偏好决定 `TeaTalkTheme(darkTheme=)`、系统栏图标与 WebView 底色。
+- Web 端强制主题：新增 `web/theme-boot.js`，在 `style.css` 之前把 `?theme=` 解析成 `<html data-theme>`；`style.css` 的暗色 token 改为 `--d-*` 单处定义、媒体查询与 `[data-theme="dark"]` 双处映射。四种组合（系统浅/深 × 无参数/强制）均已实测正确。
+- `HostActivity`：诊断区折叠进「高级选项」（`AnimatedVisibility` 180ms tween，无弹簧），「进入聊天」上移；在线人数并入状态行。
+- Web 修复：composer 输入框、＋、发送键统一 34px 基线（原先 36/34/34 + 底部对齐导致错位）；文件库行分隔线改伪元素绘制，不再被右滑色块盖住。
+- 版本 `0.1.9.1` / versionCode 12，已构建 APK；`docs/screenshots/` 三张重出。
+- 待真机验收：Compose 页面与下载面板仅编译验证；扫码页、开房页折叠态、下载进度/打开需真机确认。

@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
@@ -64,6 +65,7 @@ import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.vertin.teatalk.ui.DarkTeaPalette
 import com.vertin.teatalk.ui.TeaPrimaryButton
+import com.vertin.teatalk.ui.TeaSettings
 import com.vertin.teatalk.ui.TeaTalkTheme
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -76,9 +78,14 @@ class ScanQrActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val dark = TeaSettings.isDark(this)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
         setContent {
             BackHandler { finish() }
-            TeaTalkTheme { ScanScreen() }
+            TeaTalkTheme(darkTheme = dark) { ScanScreen() }
         }
     }
 

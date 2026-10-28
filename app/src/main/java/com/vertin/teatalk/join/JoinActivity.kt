@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.vertin.teatalk.chat.ChatActivity
@@ -58,6 +59,7 @@ import com.vertin.teatalk.ui.TeaPrimaryButton
 import com.vertin.teatalk.ui.TeaRule
 import com.vertin.teatalk.ui.TeaScreen
 import com.vertin.teatalk.ui.TeaSectionLabel
+import com.vertin.teatalk.ui.TeaSettings
 import com.vertin.teatalk.ui.TeaSpinner
 import com.vertin.teatalk.ui.TeaTalkTheme
 import com.vertin.teatalk.ui.TeaTextField
@@ -83,8 +85,13 @@ class JoinActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val dark = TeaSettings.isDark(this)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
         setContent {
-            TeaTalkTheme { JoinScreen() }
+            TeaTalkTheme(darkTheme = dark) { JoinScreen() }
         }
     }
 
