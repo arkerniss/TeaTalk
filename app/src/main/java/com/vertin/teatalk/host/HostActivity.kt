@@ -13,9 +13,11 @@ import com.vertin.teatalk.ui.glass.GlassTextButton
 import com.vertin.teatalk.ui.glass.TeaGlassScaffold
 import com.vertin.teatalk.ui.glass.TeaInk
 import java.util.UUID
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -25,8 +27,10 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -73,6 +77,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vertin.teatalk.chat.ChatActivity
@@ -115,6 +120,17 @@ class HostActivity : ComponentActivity() {
     private fun HostScreen(backdrop: Backdrop) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
+        val notificationPermission = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { }
+        LaunchedEffect(Unit) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
         val server = remember {
             LanServer(
                 ServerConfig(
@@ -169,6 +185,16 @@ class HostActivity : ComponentActivity() {
             onDispose {
                 discovery.close()
                 runCatching { server.stop() }
+                runCatching { context.stopService(Intent(context, HostKeepAliveService::class.java)) }
+            }
+        }
+
+        LaunchedEffect(running) {
+            val serviceIntent = Intent(context, HostKeepAliveService::class.java)
+            if (running) {
+                runCatching { ContextCompat.startForegroundService(context, serviceIntent) }
+            } else {
+                runCatching { context.stopService(serviceIntent) }
             }
         }
 
@@ -460,7 +486,7 @@ class HostActivity : ComponentActivity() {
                 }
 
                 Text(
-                    "当前版本还没有前台服务：测试时请让主机 App 保持前台/亮屏。文件保存在主机 App 私有目录，清空/卸载即删。",
+                    "开房后会自动开启前台服务保活：切到后台或锁屏也能继续开房，通知栏会显示「茶室正在开房」。极端省电策略下系统仍可能停止服务。文件保存在主机 App 私有目录，清空/卸载即删。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -75,3 +75,10 @@
 - 新增 `ui/glass/TeaGlass.kt`：环境光背景、GlassCard、GlassButton、GlassSurface。
 - 首页、加入房间、主机控制台改为原生 Liquid Glass UI；Web 聊天页不变。
 - 构建 versionCode 8 / 0.1.6；Release 只写更新日志，不上传 APK。
+
+## 2026-10-28 · 0.1.7（构建）
+
+- Web 聊天页加入 CSS 液态玻璃：顶栏、输入栏、菜单/文件/加入面板；旧浏览器回退实色。
+- 聊天页加入环境漂移、消息入场、面板/弹窗进场、发送按钮按压等轻量动画。
+- HostActivity 增加 HostKeepAliveService：前台服务通知 + PARTIAL_WAKE_LOCK + Wi-Fi 高性能锁。
+- Android 13+ 请求通知权限；构建 versionCode 9 / 0.1.7；Release 只写更新日志。

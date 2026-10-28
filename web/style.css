@@ -546,7 +546,7 @@ button { cursor: pointer; }
   margin-bottom: 10px;
   overflow: hidden;
   border-radius: var(--radius-md);
-  background: transparent;
+  background: var(--bg);
 }
 .file-actions {
   position: absolute;
@@ -644,6 +644,192 @@ button { cursor: pointer; }
   .brand-name { font-size: 17px; }
   .room-name { display: none; }
   .join-card { padding: 24px 20px; }
+}
+
+/* --------------------------------------------------------------------------
+   Liquid glass + chat motion
+   Modern browsers get a frosted, edge-lit surface. Older browsers keep the
+   opaque fallback above; nothing here changes layout or the WebView contract.
+   -------------------------------------------------------------------------- */
+:root {
+  --glass-bg: color-mix(in srgb, var(--bg) 58%, transparent);
+  --glass-bg-strong: color-mix(in srgb, var(--bg) 72%, transparent);
+  --glass-border: color-mix(in srgb, var(--line) 52%, rgba(255, 255, 255, 0.75));
+  --glass-highlight: rgba(255, 255, 255, 0.68);
+  --glass-shadow: 0 14px 38px rgba(20, 32, 31, 0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-bg: color-mix(in srgb, var(--bg) 56%, transparent);
+    --glass-bg-strong: color-mix(in srgb, var(--bg) 74%, transparent);
+    --glass-border: color-mix(in srgb, var(--line) 58%, rgba(255, 255, 255, 0.18));
+    --glass-highlight: rgba(255, 255, 255, 0.20);
+    --glass-shadow: 0 14px 38px rgba(0, 0, 0, 0.30);
+  }
+}
+
+#app { isolation: isolate; }
+#app::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 34%, transparent) 0, transparent 40%),
+    radial-gradient(circle at 88% 13%, color-mix(in srgb, var(--accent) 26%, transparent) 0, transparent 36%),
+    radial-gradient(circle at 92% 82%, color-mix(in srgb, var(--primary) 27%, transparent) 0, transparent 43%),
+    radial-gradient(circle at 8% 88%, color-mix(in srgb, #e7b76d 22%, transparent) 0, transparent 38%);
+  filter: blur(26px) saturate(1.15);
+  transform: translate3d(0, 0, 0) scale(1.05);
+  animation: ambientDrift 24s ease-in-out infinite alternate;
+}
+#conn-banner, #messages, #composer { position: relative; z-index: 1; }
+
+@keyframes ambientDrift {
+  0%   { transform: translate3d(-1.5%, -1%, 0) scale(1.04) rotate(-1deg); }
+  100% { transform: translate3d(1.8%, 1.4%, 0) scale(1.08) rotate(1.4deg); }
+}
+
+/* Top bar: already blurred in fallback, now more edge-lit. */
+#topbar {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+}
+#topbar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 22%, var(--glass-highlight) 46%, transparent 68%);
+  opacity: 0.28;
+  mix-blend-mode: screen;
+}
+
+/* Rounded floating composer, with the input itself sitting on a quieter glass. */
+#composer {
+  border-top: 1px solid var(--glass-border);
+  border-radius: 24px 24px 0 0;
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 -10px 32px rgba(20, 32, 31, 0.07);
+  transition: box-shadow 220ms ease, background 220ms ease;
+}
+#composer:focus-within {
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 -12px 40px rgba(0, 86, 82, 0.13);
+}
+#text-input {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.users-btn, .icon-btn { transition: background 180ms ease, color 180ms ease, transform 160ms ease; }
+.users-btn:active, .icon-btn:active { transform: scale(0.94); }
+
+/* Menus, sheets, modals, join card. */
+.sheet, .join-card {
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+.sheet { border-radius: 26px 26px 0 0; animation: glassSheetUp 280ms cubic-bezier(0.2, 0.85, 0.25, 1) both; }
+.modal-card {
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  animation: glassModalIn 220ms cubic-bezier(0.2, 0.85, 0.25, 1) both;
+}
+.join-card { animation: glassCardIn 380ms cubic-bezier(0.2, 0.85, 0.25, 1) both; }
+.sheet-backdrop { backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.menu-item { transition: background 180ms ease, transform 160ms ease; }
+.menu-item:active { transform: scale(0.985); }
+
+/* File page cards. */
+.files-view {
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  animation: glassViewIn 220ms ease-out both;
+}
+.files-head {
+  border-bottom: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+}
+.file-main {
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 6px 18px rgba(20, 32, 31, 0.06);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.file-main:active { box-shadow: inset 0 1px 0 var(--glass-highlight), 0 3px 10px rgba(20, 32, 31, 0.05); }
+
+/* Messages: a tiny rise/fade for each new bubble. */
+.msg { animation: chatMessageIn 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.bubble, .file-card { transition: transform 160ms ease, box-shadow 160ms ease; }
+.msg.own .bubble:active, .msg.own .file-card:active { transform: scale(0.985); }
+
+.send-btn {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 24%, transparent);
+  transition: transform 150ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+.send-btn:hover { filter: brightness(1.04); }
+.send-btn:active { transform: scale(0.94); }
+#new-msg-btn { animation: newMessageNudge 2.8s ease-in-out infinite; }
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #topbar, #composer, .sheet, .join-card, .modal-card, .file-main, .users-btn, .files-head, .files-view {
+    -webkit-backdrop-filter: blur(18px) saturate(1.55);
+    backdrop-filter: blur(18px) saturate(1.55);
+  }
+  #topbar {
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
+  }
+  #composer {
+    background: color-mix(in srgb, var(--bg) 52%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.6);
+    backdrop-filter: blur(22px) saturate(1.6);
+  }
+  .sheet {
+    background: color-mix(in srgb, var(--bg) 62%, transparent);
+    -webkit-backdrop-filter: blur(26px) saturate(1.45);
+    backdrop-filter: blur(26px) saturate(1.45);
+  }
+  .join-card {
+    background: color-mix(in srgb, var(--bg) 52%, transparent);
+    -webkit-backdrop-filter: blur(26px) saturate(1.45);
+    backdrop-filter: blur(26px) saturate(1.45);
+  }
+  .modal-card {
+    background: color-mix(in srgb, var(--bg) 62%, transparent);
+    -webkit-backdrop-filter: blur(26px) saturate(1.4);
+    backdrop-filter: blur(26px) saturate(1.4);
+  }
+  .file-main {
+    background: color-mix(in srgb, var(--bg) 64%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+  }
+  .files-head {
+    background: color-mix(in srgb, var(--bg) 64%, transparent);
+  }
+  .users-btn {
+    background: color-mix(in srgb, var(--bg) 52%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
+    backdrop-filter: blur(14px) saturate(1.5);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #topbar, #composer, .sheet, .join-card, .modal-card, .file-main, .users-btn, .files-head, .files-view {
+    background: var(--bg);
+  }
+}
+
+@keyframes glassSheetUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glassModalIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes glassCardIn { from { opacity: 0; transform: translateY(12px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes glassViewIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes chatMessageIn { from { opacity: 0; transform: translateY(8px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes newMessageNudge {
+  0%, 78%, 100% { transform: translateX(-50%) translateY(0); }
+  84% { transform: translateX(-50%) translateY(-3px); }
+  90% { transform: translateX(-50%) translateY(1px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

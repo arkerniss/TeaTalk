@@ -179,7 +179,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
             Text(
-                "主机没有前台服务，开房期间请保持 App 在前台。",
+                "开房后会自动开启前台服务保活；可在通知栏看到「茶室正在开房」。",
                 style = MaterialTheme.typography.bodySmall,
                 color = TeaMuted,
             )
