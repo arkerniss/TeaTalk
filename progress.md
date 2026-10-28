@@ -61,3 +61,10 @@
 - 清除聊天记录只清消息和文件卡片，文件库/物理文件保留；下载改为按文件库解析。
 - 新增 `/api/library`、`/api/library/{id}/extend`、`/api/room/clear`、WS `files-changed`。
 - `:core:test` 通过；devserver 浏览器验证菜单/文件页/右滑/清除历史；未构建 APK、未创建 Release。
+
+## 2026-10-28 · 0.1.5.3（未构建）
+
+- 设计并落地茶室 App 图标：深茶绿底、奶油色茶杯、聊天气泡尾巴、薄荷色热气。
+- 新增自适应图标、圆形图标、Android 13 单色主题图标；前景按安全区缩放。
+- 新增 `docs/icon/` 预览与设计说明。
+- `xmllint` 与 `aapt2 compile` 校验资源；未构建 APK、未创建 Release。

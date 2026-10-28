@@ -12,6 +12,7 @@
   - 支持文字、文件上传/下载、图片预览
   - 聊天页右上角菜单：「文件」历史文件库、「清除聊天记录」
   - 文件保留 7 天，右滑文件可延期 7 天；清除聊天记录不会删除文件
+  - 茶室品牌图标：深茶绿底、奶油色茶杯 + 聊天气泡尾巴，含自适应/单色图标
 - `core/`：纯 JVM 引擎、服务器、发现协议
   - `ChatEngine`：用户、消息、独立文件库、房间 epoch
   - JSONL 消息日志、文件落盘、文件库索引、WebSocket hub
@@ -52,7 +53,7 @@ APK输出/茶室/v<versionName>_vc<versionCode>/茶室-v<versionName>-vc<version
 - **真正构建 APK 时：递增第三位**，例如 `0.1.6`，第四位归零。
 - 第二位只有用户明确要求时才更新（例如 `0.2.0`），同时第三位归 0。
 - `versionCode` 是 Android 安装顺序号，每次准备构建时单调递增，不随显示版本重置。
-- 当前状态：最近构建/Release 是 `0.1.5`；当前源码（未构建）是 `0.1.5.2`。
+- 当前状态：最近构建/Release 是 `0.1.5`；当前源码（未构建）是 `0.1.5.3`。
 
 ## 发布 / Release
 
@@ -95,3 +96,4 @@ devserver/build/install/devserver/bin/devserver
 - `findings.md`：技术事实与已修复问题
 - `progress.md`：开发/验证记录
 - `docs/screenshots/web-chat.png`：Web 页面截图
+- `docs/icon/`：App 图标预览、色板与 Android 资源说明
