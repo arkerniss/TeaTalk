@@ -25,6 +25,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.vertin.teatalk.BuildConfig
 import java.net.URLDecoder
@@ -65,16 +66,26 @@ class ChatActivity : ComponentActivity() {
             ),
         )
         ViewCompat.setOnApplyWindowInsetsListener(root) { target, insets ->
-            // System bars only. Do NOT shrink the WebView for IME here: a stale or
-            // full-height IME inset is what made the chat page render as a short strip.
-            // The web page tracks visualViewport height for the keyboard instead.
+            // Apply the IME inset only while the keyboard is actually visible. An
+            // unconditional stale IME inset is what previously collapsed the WebView
+            // to a short strip; this keeps the composer above the keyboard.
             val bars = insets.getInsets(
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout(),
             )
-            target.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val bottomInset = if (imeVisible) maxOf(bars.bottom, ime.bottom) else bars.bottom
+            target.setPadding(bars.left, bars.top, bars.right, bottomInset)
             insets
         }
         setContentView(root)
+
+        // The chat page is white; force dark system-bar icons so the status bar
+        // time/battery remains visible instead of blending into the white bar.
+        WindowCompat.getInsetsController(window, root).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
         ViewCompat.requestApplyInsets(root)
 
         onBackPressedDispatcher.addCallback(
