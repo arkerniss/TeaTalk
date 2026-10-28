@@ -12,18 +12,22 @@
 </p>
 
 <p>
-<img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-00696D?style=flat-square&logo=android&logoColor=white" />
+<img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-AE5129?style=flat-square&logo=android&logoColor=white" />
 <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.3-7F52FF?style=flat-square&logo=kotlin&logoColor=white" />
 <img alt="Jetpack Compose" src="https://img.shields.io/badge/Jetpack-Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white" />
 <img alt="LAN first" src="https://img.shields.io/badge/LAN-first-B8732E?style=flat-square" />
-<img alt="version" src="https://img.shields.io/badge/version-0.1.8-00696D?style=flat-square" />
+<img alt="version" src="https://img.shields.io/badge/version-0.1.9-AE5129?style=flat-square" />
 </p>
 
 <p>
-<img src="docs/screenshots/chat.png" width="270" alt="聊天界面" />
+<img src="docs/screenshots/chat.png" width="230" alt="聊天界面（浅色）" />
 &nbsp;&nbsp;
-<img src="docs/screenshots/join.png" width="270" alt="加入房间" />
+<img src="docs/screenshots/join.png" width="230" alt="加入房间（浅色）" />
+&nbsp;&nbsp;
+<img src="docs/screenshots/chat-dark.png" width="230" alt="聊天界面（暗色）" />
 </p>
+
+<p><sub>截图均为 390×844 @1x，与仓库既有尺寸一致。</sub></p>
 
 </div>
 
@@ -103,6 +107,9 @@ devserver/build/install/devserver/bin/devserver
 **为什么文件有 7 天期限？**  
 主机存储空间有限，文件库默认只保留最近 7 天；确实需要的文件可以右滑延期。清除聊天记录不会删文件，两个功能互不打扰。
 
+**界面为什么长这样？**  
+这套叫 Paper & Clay：暖纸色的底，衬线标题，一处陶土色做点睛，时间、IP、文件大小这些零碎信息用等宽字，分隔只靠一根发丝线。浅色和暗色跟着系统走，不用手动切。没有毛玻璃，也没有堆叠的入场动效——上一版动效被反馈过「觉得卡」，所以这次只留下颜色和按压反馈，把该省的省掉。
+
 ## 技术栈与结构
 
 <details>
@@ -129,7 +136,7 @@ docs/       截图、图标、发布说明
 
 ## 版本与更新
 
-当前构建版本：**0.1.8**
+当前构建版本：**0.1.9**
 
 - [更新日志](CHANGELOG.md)
 - [Release 页面](https://github.com/arkerniss/TeaTalk/releases)

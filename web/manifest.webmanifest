@@ -4,8 +4,8 @@
   "description": "局域网聊天与文件传输",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#00696d",
+  "background_color": "#faf8f3",
+  "theme_color": "#ae5129",
   "lang": "zh-CN",
   "icons": []
 }

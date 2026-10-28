@@ -13,42 +13,42 @@
         <path
             android:fillColor="#00000000"
             android:pathData="M73.8,53.3 C81.6,52.7 86.8,55.9 88.2,60.1 C88.9,64.4 86.2,68.2 82.5,69.6 C80.0,70.5 76.4,70.3 74.3,69.6"
-            android:strokeColor="#F6EBDD"
+            android:strokeColor="#FAF8F3"
             android:strokeLineCap="round"
             android:strokeWidth="4.4" />
 
         <!-- Cream cup body with a rounded bottom. -->
         <path
-            android:fillColor="#F6EBDD"
+            android:fillColor="#FAF8F3"
             android:pathData="M32.3,46.2 H75.7 L70.9,68.6 C70.4,71.2 69.4,73.6 67.7,74.9 L44.0,74.9 C42.3,73.6 41.3,71.2 40.8,68.6 Z" />
 
         <!-- Amber tea surface. -->
         <path
-            android:fillColor="#D79A4A"
+            android:fillColor="#AE5129"
             android:pathData="M34.8,47.4 C42.0,45.4 66.0,45.4 73.2,47.4 C73.2,49.6 66.3,51.2 54.0,51.2 C41.7,51.2 34.8,49.6 34.8,47.4 Z" />
 
         <!-- The cup body doubles as a speech bubble; this is the tail. -->
         <path
-            android:fillColor="#F6EBDD"
+            android:fillColor="#FAF8F3"
             android:pathData="M42.2,74.2 L26.4,86.4 L53.0,75.0 Z" />
 
         <!-- Three mint curls: steam and chat typing dots. -->
         <path
             android:fillColor="#00000000"
             android:pathData="M43.2,31.4 C42.8,33.2 44.2,34.3 43.4,36.1 C42.6,37.9 43.8,38.9 43.0,40.7"
-            android:strokeColor="#9AD9CB"
+            android:strokeColor="#D9784F"
             android:strokeLineCap="round"
             android:strokeWidth="2.2" />
         <path
             android:fillColor="#00000000"
             android:pathData="M54.0,29.9 C53.6,31.7 55.0,32.8 54.2,34.6 C53.4,36.4 54.6,37.4 53.8,39.2"
-            android:strokeColor="#9AD9CB"
+            android:strokeColor="#D9784F"
             android:strokeLineCap="round"
             android:strokeWidth="2.2" />
         <path
             android:fillColor="#00000000"
             android:pathData="M64.8,31.4 C64.4,33.2 65.8,34.3 65.0,36.1 C64.2,37.9 65.4,38.9 64.6,40.7"
-            android:strokeColor="#9AD9CB"
+            android:strokeColor="#D9784F"
             android:strokeLineCap="round"
             android:strokeWidth="2.2" />
     </group>

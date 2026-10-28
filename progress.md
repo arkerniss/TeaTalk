@@ -101,3 +101,17 @@
 - 新增 `HostRuntime`（进程级 LanServer + discovery），HostActivity 只负责 UI；FGS 管理进程和网络锁。
 - Service `START_STICKY` 重启补拉起；通知 `CLEAR_TOP` 回到已有 HostActivity；新增「关闭房间」。
 - 构建 versionCode 10 / 0.1.8；Release 只写更新日志、不上传 APK。
+
+## 2026-10-28 · 0.1.9：Paper & Clay 前端重设计
+
+- 设计语言定为「Paper & Clay」：暖纸底 `#FAF8F3`（暗色 `#121110`）、浮起面 `#FFFFFF`、凹陷输入井 `#F1EDE4`；单一陶土强调色 `#AE5129`（暗色 `#D9784F`），取代旧的青绿 `#00696D` + 橙 `#C2410C` 双强调色。
+- 排版：品牌/标题用衬线（`FontFamily.Serif` / Web `"Songti SC", ui-serif`）；所有元信息（时间、IP、人数、文件大小、区块标签）用等宽。
+- 分隔改用 1px 发丝线，不用边框+阴影；去掉渐变、`backdrop-filter`、emoji 图标（扩展名徽标替代）；动效收敛为颜色/边框 140ms + 按下缩放，无入场编排。
+- 新增 `ui/TeaTalkTheme.kt`（TeaPalette + TeaType + TeaShapes + TeaTalkTheme）与 `ui/TeaComponents.kt`（自绘组件，不再用 material3 Card/Button/TextButton/RadioButton）。
+- 重写 `MainActivity` / `HostActivity` / `JoinActivity` / `ScanQrActivity` 四个页面；`ChatActivity` 增加暗色 WebView 底色与系统栏图标跟随主题。
+- 新增 `res/values/themes.xml` + `res/values-night/themes.xml` 窗口主题（`windowBackground` 用 paper/paper_dark，系统栏透明 + 亮/暗图标），`AndroidManifest` 指定 `@style/Theme.TeaTalk`，消除冷启动白闪。
+- `web/style.css` 重写为 token 化样式（`prefers-color-scheme` 切换）；`index.html` 改用 svg sprite、footer composer、等宽字形、双 scheme `theme-color`；`app.js` 加消息分组（同一人 5 分钟内共用昵称/时间头、间距收到 3px）、扩展名徽标、空状态。协议层未改。
+- 启动图标换色：墨黑 `#1B1A17` 底、纸色 `#FAF8F3` 杯、陶土 `#AE5129` 茶汤、浅陶土 `#D9784F` 热气；`docs/icon/` PNG 重新生成。
+- 验证：`:app:compileDebugKotlin` 通过、`:core:test` 通过；headless Chrome + CDP 走查浅色/暗色（聊天、加入、文件、菜单、用户、清除、灯箱），并回读 token 确认 `#FAF8F3`/`#121110`/`#AE5129`/`#D9784F` 生效、旧青绿 0 像素。
+- 截图更新为 390x844（scale 1）：`docs/screenshots/chat.png`、`join.png`、新增 `chat-dark.png`。
+- 待真机验收：无可用设备/模拟器，暗色系统栏、WebView 底色、启动白闪消除均未在真机确认。

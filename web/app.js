@@ -23,6 +23,8 @@
     uploadChain: Promise.resolve(),
     embed: false,
     lastDate: '',
+    groupSender: null,
+    groupTs: 0,
     files: [],
     filesOpen: false,
     clearBusy: false,
@@ -166,7 +168,8 @@
 
   function autoGrow() {
     els.text.style.height = 'auto';
-    els.text.style.height = Math.min(els.text.scrollHeight, 120) + 'px';
+    els.text.style.height = Math.min(els.text.scrollHeight, 128) + 'px';
+    els.send.classList.toggle('is-idle', !els.text.value.trim());
   }
 
   function showJoin() {
@@ -315,11 +318,15 @@
     }
   }
 
+  const GROUP_WINDOW_MS = 5 * 60 * 1000;
+
   function resetMessages() {
     state.messages = [];
     state.ids.clear();
     state.lastId = 0;
     state.lastDate = '';
+    state.groupSender = null;
+    state.groupTs = 0;
     els.messages.innerHTML = '';
   }
 
@@ -341,15 +348,27 @@
   function appendMessage(msg, scroll) {
     removeEmptyState();
     const dateLabel = formatDate(msg.ts);
-    if (dateLabel !== state.lastDate) {
+    const newDay = dateLabel !== state.lastDate;
+    if (newDay) {
       state.lastDate = dateLabel;
       const sep = document.createElement('div');
       sep.className = 'date-sep';
       sep.textContent = dateLabel;
       els.messages.appendChild(sep);
+      state.groupSender = null;
+      state.groupTs = 0;
     }
+    // Consecutive messages from the same person inside the window share one
+    // sender/time header and tighten their vertical rhythm.
+    const sender = msg.senderId || null;
+    const sameGroup = !newDay && sender !== null && sender === state.groupSender &&
+      msg.ts - state.groupTs < GROUP_WINDOW_MS;
     const wasNearBottom = isNearBottom();
-    els.messages.appendChild(messageElement(msg));
+    const row = messageElement(msg, !sameGroup);
+    if (sameGroup) row.classList.add('group-has-prev');
+    els.messages.appendChild(row);
+    state.groupSender = sender;
+    state.groupTs = msg.ts;
     if (scroll && (wasNearBottom || isOwn(msg))) scrollToBottom(false);
     else if (!wasNearBottom) els.newMsg.classList.remove('hidden');
   }
@@ -358,10 +377,14 @@
     const oldScroll = els.messages.scrollTop;
     els.messages.innerHTML = '';
     state.lastDate = '';
+    state.groupSender = null;
+    state.groupTs = 0;
     if (state.messages.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
-      empty.innerHTML = '<strong>还没有人说话</strong>打个招呼，或者拖个文件进来。';
+      empty.innerHTML = '<svg class="cup" aria-hidden="true" focusable="false">' +
+        '<use href="#i-cup"/></svg><strong>还没有人说话</strong>' +
+        '<span>打个招呼，或者拖个文件进来。</span>';
       els.messages.appendChild(empty);
       return;
     }
@@ -375,24 +398,26 @@
     if (empty) empty.remove();
   }
 
-  function messageElement(msg) {
+  function messageElement(msg, showMeta) {
     const own = isOwn(msg);
     const row = document.createElement('div');
     row.className = 'msg ' + (own ? 'own' : 'other');
 
-    const meta = document.createElement('div');
-    meta.className = 'msg-meta';
-    if (!own) {
-      const sender = document.createElement('span');
-      sender.className = 'msg-sender';
-      sender.textContent = msg.senderName || '访客';
-      meta.appendChild(sender);
+    if (showMeta) {
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+      if (!own) {
+        const sender = document.createElement('span');
+        sender.className = 'msg-sender';
+        sender.textContent = msg.senderName || '访客';
+        meta.appendChild(sender);
+      }
+      const time = document.createElement('span');
+      time.className = 'msg-time';
+      time.textContent = formatTime(msg.ts);
+      meta.appendChild(time);
+      row.appendChild(meta);
     }
-    const time = document.createElement('span');
-    time.className = 'msg-time';
-    time.textContent = formatTime(msg.ts);
-    meta.appendChild(time);
-    row.appendChild(meta);
 
     if (msg.kind === 'file' && msg.file) {
       row.appendChild(fileElement(msg));
@@ -449,7 +474,7 @@
     card.download = file.name;
     const icon = document.createElement('div');
     icon.className = 'file-icon';
-    icon.textContent = fileIcon(file.name);
+    icon.textContent = fileExt(file.name);
     const info = document.createElement('div');
     info.className = 'file-info';
     const name = document.createElement('div');
@@ -537,7 +562,7 @@
     top.className = 'pending-top';
     const icon = document.createElement('div');
     icon.className = 'file-icon';
-    icon.textContent = fileIcon(file.name);
+    icon.textContent = fileExt(file.name);
     const name = document.createElement('div');
     name.className = 'pending-name';
     name.textContent = file.name;
@@ -700,7 +725,7 @@
     main.className = 'file-main';
     const icon = document.createElement('div');
     icon.className = 'file-icon';
-    icon.textContent = fileIcon(record.name);
+    icon.textContent = fileExt(record.name);
 
     const info = document.createElement('div');
     info.className = 'file-row-info';
@@ -900,15 +925,24 @@
     return /\.(jpe?g|png|gif|webp|avif|heic|heif)$/i.test(file.name || '');
   }
 
-  function fileIcon(name) {
-    const ext = String(name || '').split('.').pop().toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'heic'].includes(ext)) return '🖼';
-    if (['mp4', 'mov', 'mkv', 'webm'].includes(ext)) return '🎬';
-    if (['mp3', 'wav', 'm4a', 'flac'].includes(ext)) return '🎵';
-    if (['pdf'].includes(ext)) return '📕';
-    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return '🗜';
-    if (['doc', 'docx', 'txt', 'md'].includes(ext)) return '📄';
-    return '📎';
+  // File cards show the extension as a small monospace badge instead of an
+  // emoji: it is language-neutral, aligns to the baseline grid and stays
+  // legible in both light and dark paper themes.
+  const EXT_LABELS = {
+    jpg: 'JPG', jpeg: 'JPG', png: 'PNG', gif: 'GIF', webp: 'WEBP',
+    avif: 'AVIF', heic: 'HEIC', heif: 'HEIF',
+    mp4: 'MP4', mov: 'MOV', mkv: 'MKV', webm: 'WEBM',
+    mp3: 'MP3', wav: 'WAV', m4a: 'M4A', flac: 'FLAC',
+    pdf: 'PDF', zip: 'ZIP', rar: 'RAR', '7z': '7Z', tar: 'TAR', gz: 'GZ',
+    doc: 'DOC', docx: 'DOCX', txt: 'TXT', md: 'MD',
+  };
+
+  function fileExt(name) {
+    const raw = String(name || '');
+    const dot = raw.lastIndexOf('.');
+    if (dot <= 0 || dot === raw.length - 1) return 'FILE';
+    const ext = raw.slice(dot + 1).toLowerCase();
+    return EXT_LABELS[ext] || ext.toUpperCase().slice(0, 4);
   }
 
   function fileUrl(file) {

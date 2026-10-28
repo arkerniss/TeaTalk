@@ -2,7 +2,7 @@ package com.vertin.teatalk.chat
 
 import android.app.DownloadManager
 import android.content.Intent
-import android.graphics.Color
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -54,10 +54,16 @@ class ChatActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
+        // The chat page follows the system theme (prefers-color-scheme), so the
+        // WebView ground and the system bar icons have to follow it too.
+        val dark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+        val ground = if (dark) PAPER_DARK else PAPER_LIGHT
+
         // Plain View hierarchy: a WebView that explicitly MATCH_PARENTs the window.
         // Compose's AndroidView was leaving the WebView at its content height on some devices.
-        val root = FrameLayout(this).apply { setBackgroundColor(Color.WHITE) }
-        val view = createWebView(this, url)
+        val root = FrameLayout(this).apply { setBackgroundColor(ground) }
+        val view = createWebView(this, url, ground)
         root.addView(
             view,
             FrameLayout.LayoutParams(
@@ -80,11 +86,10 @@ class ChatActivity : ComponentActivity() {
         }
         setContentView(root)
 
-        // The chat page is white; force dark system-bar icons so the status bar
-        // time/battery remains visible instead of blending into the white bar.
+        // Keep the status bar time/battery readable against the page ground.
         WindowCompat.getInsetsController(window, root).apply {
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
         }
         ViewCompat.requestApplyInsets(root)
 
@@ -98,9 +103,9 @@ class ChatActivity : ComponentActivity() {
         )
     }
 
-    private fun createWebView(context: android.content.Context, url: String): WebView {
+    private fun createWebView(context: android.content.Context, url: String, ground: Int): WebView {
         val view = WebView(context)
-        view.setBackgroundColor(Color.WHITE)
+        view.setBackgroundColor(ground)
         view.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -231,5 +236,11 @@ class ChatActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_URL = "extra_url"
+
+        /** Must match --paper in web/style.css and @color/paper in colors.xml. */
+        private const val PAPER_LIGHT = 0xFFFAF8F3.toInt()
+
+        /** Must match the dark --paper token in web/style.css. */
+        private const val PAPER_DARK = 0xFF121110.toInt()
     }
 }
