@@ -5,138 +5,185 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.Backdrop
 import com.vertin.teatalk.host.HostActivity
 import com.vertin.teatalk.join.JoinActivity
 import com.vertin.teatalk.ui.TeaTalkTheme
+import com.vertin.teatalk.ui.glass.setTeaSystemBarsLight
+import com.vertin.teatalk.ui.glass.GlassButton
+import com.vertin.teatalk.ui.glass.GlassCard
+import com.vertin.teatalk.ui.glass.GlassSurface
+import com.vertin.teatalk.ui.glass.TeaAmber
+import com.vertin.teatalk.ui.glass.TeaGlassScaffold
+import com.vertin.teatalk.ui.glass.TeaInk
+import com.vertin.teatalk.ui.glass.TeaMuted
+import com.vertin.teatalk.ui.glass.TeaTeal
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        window.setTeaSystemBarsLight()
         setContent {
-            TeaTalkTheme { HomeScreen() }
+            TeaTalkTheme {
+                TeaGlassScaffold { backdrop -> HomeScreen(backdrop) }
+            }
         }
     }
 
     @Composable
-    private fun HomeScreen() {
+    private fun HomeScreen(backdrop: Backdrop) {
         val context = LocalContext.current
-        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .safeDrawingPadding()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp, vertical = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Spacer(Modifier.height(28.dp))
+                GlassSurface(
+                    backdrop = backdrop,
+                    modifier = Modifier.size(58.dp),
+                    cornerRadius = 19.dp,
+                    tint = Color(0xFFF6EBDD).copy(alpha = 0.34f),
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "茶",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = TeaTeal,
+                        )
+                    }
+                }
+                Column {
+                    Text(
+                        "茶室",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = TeaInk,
+                    )
+                    Text(
+                        "TeaTalk · 局域网慢慢聊",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TeaMuted,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "同一片 Wi-Fi，\n慢慢聊。",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = TeaInk,
+                lineHeight = MaterialTheme.typography.displaySmall.lineHeight,
+            )
+            Text(
+                "不用登录，不用外网。开一间房，朋友自动发现、扫码或输地址加入。",
+                style = MaterialTheme.typography.bodyLarge,
+                color = TeaMuted,
+            )
+
+            GlassCard(
+                backdrop = backdrop,
+                modifier = Modifier.fillMaxWidth(),
+                tint = Color.White.copy(alpha = 0.24f),
+            ) {
                 Text(
-                    "茶室",
-                    style = MaterialTheme.typography.displaySmall,
+                    "开一间房",
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = TeaInk,
                 )
                 Text(
-                    "TeaTalk",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold,
+                    "这台手机作为主机，显示二维码和局域网地址；其他手机自动搜索或扫码加入。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TeaMuted,
                 )
-                Text(
-                    "同一片 Wi-Fi，慢慢聊。",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(12.dp))
-
-                Card(
+                GlassButton(
+                    backdrop = backdrop,
+                    onClick = { context.startActivity(Intent(context, HostActivity::class.java)) },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 ) {
-                    Column(
-                        Modifier.fillMaxWidth().padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text("开一间房", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text(
-                            "这台手机作为主机，显示二维码和局域网地址；其他手机自动搜索或扫码加入。",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Button(
-                            onClick = {
-                                context.startActivity(Intent(context, HostActivity::class.java))
-                            },
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                        ) {
-                            Text("开房间", fontWeight = FontWeight.SemiBold)
-                        }
-                    }
+                    Text("开房间", fontWeight = FontWeight.SemiBold, color = Color.White)
                 }
+            }
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                ) {
-                    Column(
-                        Modifier.fillMaxWidth().padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text("加入房间", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Text(
-                            "自动搜索同一 Wi-Fi 下的茶室；搜不到也可以扫主机二维码或手动输入地址。",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        OutlinedButton(
-                            onClick = {
-                                context.startActivity(Intent(context, JoinActivity::class.java))
-                            },
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                        ) {
-                            Text("加入房间", fontWeight = FontWeight.SemiBold)
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
+            GlassCard(
+                backdrop = backdrop,
+                modifier = Modifier.fillMaxWidth(),
+                tint = Color(0xFFF6EBDD).copy(alpha = 0.22f),
+            ) {
                 Text(
-                    "版本 ${BuildConfig.VERSION_NAME} · 局域网明文传输，请只在可信网络使用。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    "加入房间",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = TeaInk,
                 )
                 Text(
-                    "主机没有前台服务，开房期间请保持 App 在前台。",
+                    "自动搜索同一 Wi-Fi 下的茶室；搜不到也可以扫主机二维码或手动输入地址。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TeaMuted,
+                )
+                GlassButton(
+                    backdrop = backdrop,
+                    onClick = { context.startActivity(Intent(context, JoinActivity::class.java)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    prominent = false,
+                ) {
+                    Text("加入房间", fontWeight = FontWeight.SemiBold, color = TeaInk)
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    "茶",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = TeaAmber,
+                )
+                Text(
+                    "版本 ${BuildConfig.VERSION_NAME} · 局域网明文传输",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = TeaMuted,
                 )
             }
+            Text(
+                "主机没有前台服务，开房期间请保持 App 在前台。",
+                style = MaterialTheme.typography.bodySmall,
+                color = TeaMuted,
+            )
+            Spacer(Modifier.height(6.dp))
         }
     }
 }

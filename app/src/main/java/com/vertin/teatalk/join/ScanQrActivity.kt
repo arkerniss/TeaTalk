@@ -51,7 +51,15 @@ import com.google.zxing.MultiFormatReader
 import com.google.zxing.NotFoundException
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
+import com.kyant.backdrop.Backdrop
 import com.vertin.teatalk.ui.TeaTalkTheme
+import com.vertin.teatalk.ui.glass.setTeaSystemBarsLight
+import com.vertin.teatalk.ui.glass.GlassButton
+import com.vertin.teatalk.ui.glass.GlassCard
+import com.vertin.teatalk.ui.glass.TeaGlassScaffold
+import com.vertin.teatalk.ui.glass.TeaInk
+import com.vertin.teatalk.ui.glass.TeaMuted
+import com.vertin.teatalk.ui.glass.TeaTeal
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -59,6 +67,7 @@ class ScanQrActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        window.setTeaSystemBarsLight()
         setContent {
             BackHandler { finish() }
             TeaTalkTheme { ScanScreen() }
@@ -135,34 +144,41 @@ class ScanQrActivity : ComponentActivity() {
                     }
                 }
             } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .safeDrawingPadding()
-                        .padding(28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        "需要相机权限才能扫码",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
-                    )
-                    Text(
-                        "也可以返回后手动输入主机地址。",
-                        color = Color.White.copy(alpha = 0.75f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                    Button(
-                        onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                        modifier = Modifier.padding(top = 18.dp),
-                    ) { Text("重新授权") }
-                    Button(
-                        onClick = { finish() },
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) { Text("返回") }
+                TeaGlassScaffold { backdrop: Backdrop ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .safeDrawingPadding()
+                            .padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        GlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                "需要相机权限才能扫码",
+                                color = TeaInk,
+                                style = MaterialTheme.typography.titleLarge,
+                                textAlign = TextAlign.Center,
+                            )
+                            Text(
+                                "也可以返回后手动输入主机地址。",
+                                color = TeaMuted,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                            GlassButton(
+                                backdrop = backdrop,
+                                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) { Text("重新授权", color = Color.White) }
+                            GlassButton(
+                                backdrop = backdrop,
+                                onClick = { finish() },
+                                modifier = Modifier.fillMaxWidth(),
+                                prominent = false,
+                            ) { Text("返回", color = TeaInk) }
+                        }
+                    }
                 }
             }
         }

@@ -68,3 +68,10 @@
 - 新增自适应图标、圆形图标、Android 13 单色主题图标；前景按安全区缩放。
 - 新增 `docs/icon/` 预览与设计说明。
 - `xmllint` 与 `aapt2 compile` 校验资源；未构建 APK、未创建 Release。
+
+## 2026-10-28 · 0.1.6（构建）
+
+- 接入 io.github.kyant0:backdrop:2.0.0（Kotlin 2.3.21 / Compose 1.11 兼容）。
+- 新增 `ui/glass/TeaGlass.kt`：环境光背景、GlassCard、GlassButton、GlassSurface。
+- 首页、加入房间、主机控制台改为原生 Liquid Glass UI；Web 聊天页不变。
+- 构建 versionCode 8 / 0.1.6；Release 只写更新日志，不上传 APK。
